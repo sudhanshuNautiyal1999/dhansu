@@ -1,0 +1,42 @@
+Q1> In this Question you are required to, given a string, replace every letter with its position in the alphabet.
+
+If anything in the text isn't a letter, ignore it and don't return it.
+
+"a" = 1, "b" = 2, etc.
+
+Example
+alphabet_position("The sunset sets at twelve o' clock.")
+Should return "20 8 5 19 21 14 19 5 20 19 5 20 19 1 20 20 23 5 12 22 5 15 3 12 15 3 11" (as a string)
+
+ANSWER>
+USING DICTINORY
+In this question we are required to give position every letter with its position in the alphabet.
+first we create a dictionry having key and values.Keys are from A-Za-z and values are 1-26. We can iterate over a string and check if element
+is string and it is in dectionary and if both condition satisfy(True) then we append it in list with the values of string(dict[value])
+Here we use two inbuilt function that is isalnum and join(isalnum-check if the element is string or not,if string give true else false and
+join-it basically join the element by str seperator in a string form).Further detail on isalnum and join search on google
+
+def alphabet_position(x):
+	z={"A":1,"B":2,"C":3,"D":4,"E":5,"F":6,"G":7,"H":8,"I":9,"J":10,"K":11,"L":12,"M":13,"N":14,"O":15,"P":16,"Q":17,"R":18,"S":19,"T":20,"U":21,"V":22,"W":23,"X":24,"Y":25,"Z":26,"a":1,"b":2,"c":3,"d":4,"e":5,"f":6,"g":7,"h":8,"i":9,"j":10,"k":11,"l":12,"m":13,"n":14,"o":15,"p":16,"q":17,"r":18,"s":19,"t":20,"u":21,"v":22,"w":23,"x":24,"y":25,"z":26}
+	a=[]
+	for i in x:
+		if i.isalnum()==True and i in z:
+			a.append(str(z[i]))
+	return (" ".join(a))
+  
+  WITHOUT USING DICTINORY
+  In this question we are required to give position every letter with its position in the alphabet.
+  Here we will use inbuilt function of string that is string.upper() which converts lower case to upper case,it help in making all 
+  element are in same type i.e upper case.We can iterate over a string and check if element it is string ,if its True then we use ord()
+  to find the value of letter and % by 65
+  as shown below
+  
+  def alphabet_position(y):
+	z=[]
+	x=y.upper()
+	for i in x:
+		if i.isalnum()==True:
+			a=ord(i)%65
+			z.append(str(a+1))
+	return (" ".join(z))
+  
