@@ -13,7 +13,7 @@ def  to_camel_case(text):
 		return ""
 	
 	c,s=0,""
-	y=" ".join(text.replace("-"," ").split())
+	y=" ".join(text.replace("-"," ").split()) 
 	y=y.replace("_"," ").split()
 	for i in y:
 		c=c+1
