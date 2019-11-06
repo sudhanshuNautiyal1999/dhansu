@@ -1,0 +1,25 @@
+Q1>
+n this Kata, you will be given a string that may have mixed uppercase and lowercase letters and your task is to convert that string to either lowercase only or uppercase only based on:
+
+make as few changes as possible.
+if the string contains equal number of uppercase and lowercase letters, convert the string to lowercase.
+For example:
+
+solve("coDe") = "code". Lowercase characters > uppercase. Change only the "D" to lowercase.
+solve("CODe") = "CODE". Uppercase characters > lowecase. Change only the "e" to uppercase.
+solve("coDE") = "code". Upper == lowercase. Change all to lowercase.
+
+ANSWER>
+def solve(x):
+	c,q=0,0
+	for i in x:
+		if i==i.lower():
+			c=c+1
+		elif i==i.upper():
+			q=q+1
+	if c>q:
+		return x.lower()
+	elif c<q:
+		return x.upper()
+	else:
+		return x.lower()
