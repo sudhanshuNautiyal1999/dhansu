@@ -1,0 +1,76 @@
+Here n can be 1 to infinity
+Q1> PATTERN1
+a: n=5         
+*
+**
+***
+****
+*****
+
+ANSWER1>
+def PATTERN1():
+	n=int(input())
+	for i in range(1,n+1):
+		print("*"*i)
+    
+Q>2 PATTERN2
+a:n=5
+*****
+ ****
+  ***
+   **
+    *
+ANSWER2>
+def PATTERN2():
+	n=int(input())
+	for i in range(n,0,-1):
+		print(" "*(n-i)+"*"*i)
+Q3> PATTERN3
+a:n=7
+*******
+******
+*****
+****
+***
+**
+*
+ANSWER3>
+def PATTERN3():
+	n=int(input())
+	for i in range(n,0,-1):
+		print("*"*i)
+Q4> PATTERN4
+a:n=6
+     *
+    ***
+   *****
+  *******
+ *********
+***********
+ANSWER4>
+def PATTERN4():
+	n=int(input())
+	for i in range(0,n):
+		print((" "*((n-1)-i))+"*"*(2*i+1))
+Q5> PATTERN5
+a:n=7
+*************
+ ***********
+  *********
+   *******
+    *****
+     ***
+      *
+ ANSWER5>
+ def PATTERN5():
+	n=int(input())
+	for i in range(n,0,-1):
+		print((" "*(n-i)+"*"*(2*i-1)))
+    
+
+
+
+    
+    
+
+    
