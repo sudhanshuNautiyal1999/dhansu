@@ -66,6 +66,26 @@ a:n=7
 	n=int(input())
 	for i in range(n,0,-1):
 		print((" "*(n-i)+"*"*(2*i-1)))
+Q6> PATTERN6
+a:n=9
+    *
+   ***
+  *****
+ *******
+*********
+ *******
+  *****
+   ***
+    *
+ANSWER6>
+def PATTERN4():
+	n=int(input())
+	z=n//2+1
+	for i in range(0,z):
+		print(" "*(z-1-i)+"*"*(2*i+1))
+	q=n-z	
+	for j in range(q,0,-1):
+		print(" "*(z-j)+"*"*(2*j-1))
     
 
 
