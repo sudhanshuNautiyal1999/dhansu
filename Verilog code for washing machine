@@ -9,6 +9,7 @@ At any stage or state. if power goes to "0", machine moves back to "idle" sta
 VERILOG CODE:-
 I have used moore state machine to develop the state diagram
 
+
 module washing(clk,reset,onoff,power,water_full,detergent_full,wash_ongoing,spindry_ongoing);
 input clk,onoff,reset,power,water_full,detergent_full;
 output reg wash_ongoing,spindry_ongoing;
