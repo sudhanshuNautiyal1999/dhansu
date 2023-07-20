@@ -4,7 +4,7 @@ In "Detergent" state it waits for detergent_full input to be 1. If this is "1", 
 it stays in same state.
 In "Wash" state it simply asserts "wash ongoing" output as "1" and waits for 50 clock cycles. After 100 clock cycles, the wash ongoing goes back to "0" and machine goes to "Spin Dry" state.
 In "Spin Dry" state it simply asserts "spindry ongoing" output as "1" and waits for 50 clock cycles. After 30 clock cycles, the spindry ongoing goes back to "0" and machine goes back to idle state
-At any stage or state. if power goes to "0", machine moves back to "idie" state
+At any stage or state. if power goes to "0", machine moves back to "idle" state
 
 VERILOG CODE:-
 module washing(clk,reset,onoff,power,water_full,detergent_full,wash_ongoing,spindry_ongoing);
