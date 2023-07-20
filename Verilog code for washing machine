@@ -1,1 +1,108 @@
+Design a verilog code for washing machine according to below conditions :-
+In state "Water" the machine waits for water full input to be 1. if this is "1", it moves to "Detergent" state. Else it stays in same state.
+In "Detergent" state it waits for detergent_full input to be 1. If this is "1", it moves to "Wash" state. Else
+it stays in same state.
+In "Wash" state it simply asserts "wash ongoing" output as "1" and waits for 100 clock cycles. After 100 clock cycles, the wash ongoing goes back to "0" and machine goes to "Spin Dry" state.
+In "Spin Dry" state it simply asserts "spindry ongoing" output as "1" and waits for 50 clock cycles. After 50 clock cycles, the spindry ongoing goes back to "0" and machine goes back to idle state
+At any stage or state. if power goes to "0", machine moves back to "idie" state
+
+VERILOG CODE:-
+module washing(clk,reset,onoff,power,water_full,detergent_full,wash_ongoing,spindry_ongoing);
+input clk,onoff,reset,power,water_full,detergent_full;
+output reg wash_ongoing,spindry_ongoing;
+parameter idle=3'b010,water=3'b011,detergent=3'b110,wash=3'b101,spindry=3'b111;
+reg [2:0]pes,nes;
+reg [6:0]wcount,scount;
+
+always @(posedge clk)
+begin
+if(reset)
+pes<=idle;
+else
+pes<=nes;
+end
+
+always @(wcount,scount,onoff,power,water_full,detergent_full,pes)
+begin
+case(pes)
+idle: nes=power&onoff?water:idle;
+water: nes=power?(water_full?detergent:water):idle;
+detergent: nes=power?(detergent_full?wash:detergent):idle;
+wash:begin
+if ((wcount==50) &&( power==1'b1))
+nes=spindry;
+else
+nes=power?wash:idle;
+end
+spindry:begin
+if ((scount==30) &&( power==1'b1))
+nes=idle;
+else
+nes=power?spindry:idle;
+end
+endcase
+end
+
+
+always @(posedge clk)
+begin
+if(reset)
+begin
+wcount<=7'b0000000;
+scount<=7'b0000000;
+end
+else
+begin
+if (pes==wash)
+begin
+wcount<=wcount+1'b1;
+wash_ongoing<=1'b1;
+spindry_ongoing<=1'b0;
+end
+else if(pes==spindry)
+begin
+scount<=scount+1'b1;
+wash_ongoing<=1'b0;
+spindry_ongoing<=1'b1;
+end
+else
+begin
+wash_ongoing<=1'b0;
+spindry_ongoing<=1'b0;
+end
+end
+end
+endmodule
+TESTBENCH :-
+module test;
+reg clk,onoff,reset,power,water_full,detergent_full;
+wire wash_ongoing,spindry_ongoing;
+washing dut(clk,reset,onoff,power,water_full,detergent_full,wash_ongoing,spindry_ongoing);
+initial
+begin
+clk=1'b0;
+end
+initial
+begin
+reset=1'b1;
+power=1'b1;
+onoff=1'b1;
+water_full=1'b0;
+detergent_full=1'b0;
+#6
+reset=1'b0;
+water_full=1'b0;
+detergent_full=1'b0;
+#40
+water_full=1'b1;
+detergent_full=1'b0;
+#40
+water_full=1'b0;
+detergent_full=1'b1;
+end
+always #5 clk=~clk;
+endmodule
+
+
+
 
