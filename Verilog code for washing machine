@@ -2,8 +2,8 @@ Design a verilog code for washing machine according to below conditions :-
 In state "Water" the machine waits for water full input to be 1. if this is "1", it moves to "Detergent" state. Else it stays in same state.
 In "Detergent" state it waits for detergent_full input to be 1. If this is "1", it moves to "Wash" state. Else
 it stays in same state.
-In "Wash" state it simply asserts "wash ongoing" output as "1" and waits for 100 clock cycles. After 100 clock cycles, the wash ongoing goes back to "0" and machine goes to "Spin Dry" state.
-In "Spin Dry" state it simply asserts "spindry ongoing" output as "1" and waits for 50 clock cycles. After 50 clock cycles, the spindry ongoing goes back to "0" and machine goes back to idle state
+In "Wash" state it simply asserts "wash ongoing" output as "1" and waits for 50 clock cycles. After 100 clock cycles, the wash ongoing goes back to "0" and machine goes to "Spin Dry" state.
+In "Spin Dry" state it simply asserts "spindry ongoing" output as "1" and waits for 50 clock cycles. After 30 clock cycles, the spindry ongoing goes back to "0" and machine goes back to idle state
 At any stage or state. if power goes to "0", machine moves back to "idie" state
 
 VERILOG CODE:-
