@@ -1,0 +1,94 @@
+module gcd_two_number(clk,rst,in,a,b,out);
+input in,clk,rst;
+input [3:0]a,b;
+output reg [3:0]out;
+parameter start=3'b001,campare=3'b010,swap=3'b100,result=3'b000,substract=3'b111;
+reg [2:0] ps,ns;
+reg ag,ae,al;
+reg [3:0]A,B,tmp;
+always @(posedge clk)
+begin
+if (rst)
+ps<=start;
+else
+ps<=ns;
+end
+always @(a,b,ps,in,ag,ae,al,A,B)
+begin
+case(ps)
+start: begin
+ns=in?campare:start;
+end
+campare: begin
+ns=ag?substract:(al?swap:result);
+end
+substract: begin
+ns=campare;
+end
+swap: begin
+ns=campare;
+end
+result: begin
+ns=result;
+end
+endcase
+end
+always @(ag,ae,al,ps)
+begin
+if (rst)
+begin
+ag=1'b0;
+ae=1'b0;
+al=1'b0;
+out=A;
+A=a;
+B=b;
+end
+else if(ps==campare)
+begin
+ag=(A>B);
+ae=(A==B);
+al=(A<B);
+out=A;
+end
+else if(ps==substract)
+begin
+A=A-B;
+out=A;
+end
+else if (ps==swap)
+begin
+tmp=A;
+A=B;
+B=tmp;
+out=A;
+end
+else if(ps==result)
+begin
+out=A;
+end
+end
+endmodule
+TESTBENCH:-
+module tb;
+reg clk,rst,in;
+reg [3:0]a,b;
+wire [3:0] out;
+integer i;
+practice dut(clk,rst,in,a,b,out);
+initial
+begin
+clk=1'b0;
+rst=1'b1;
+a=4'b1111;
+b=4'b0011;
+#10;
+rst=1'b0;
+in=1'b1;
+#10;
+in=1'b1;
+
+end
+always #5 clk=~clk;
+
+endmodule
