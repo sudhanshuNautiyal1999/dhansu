@@ -69,7 +69,7 @@ rst=1'b0;
 end
 always #5 clk=~clk;
 endmodule
-3) half adder using mux
+3) half adder using 4X1 mux
 module mux4X1(in1,in2,in3,in4,sel1,sel2,out);
 input in1,in2,in3,in4,sel1,sel2;
 output reg out;
