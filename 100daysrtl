@@ -35,7 +35,8 @@ in=i;
 end
 end
 endmodule
-2) module graycounteightbit(clk,out,rst);
+2) 8 bit graycounter 
+module graycounteightbit(clk,out,rst);
 input clk,rst;
 output reg [2:0] out;
 reg [2:0]count;
@@ -68,7 +69,8 @@ rst=1'b0;
 end
 always #5 clk=~clk;
 endmodule
-3) module mux4X1(in1,in2,in3,in4,sel1,sel2,out);
+3) half adder using mux
+module mux4X1(in1,in2,in3,in4,sel1,sel2,out);
 input in1,in2,in3,in4,sel1,sel2;
 output reg out;
 always @(*)
