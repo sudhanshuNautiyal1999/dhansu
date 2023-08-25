@@ -68,4 +68,46 @@ rst=1'b0;
 end
 always #5 clk=~clk;
 endmodule
+3) module mux4X1(in1,in2,in3,in4,sel1,sel2,out);
+input in1,in2,in3,in4,sel1,sel2;
+output reg out;
+always @(*)
+begin
+if ({sel1,sel2}==2'b00)
+out=in1;
+else if ({sel1,sel2}==2'b01)
+out=in2;
+else if ({sel1,sel2}==2'b10)
+out=in3;
+else if ({sel1,sel2}==2'b11)
+out=in4;
+end
+endmodule
+
+module halfadderusingmux(x,y,sum,carry);
+input x,y;
+output sum,carry;
+mux4X1 d1(0,1,1,0,x,y,sum);
+mux4X1 d2(0,0,0,1,x,y,carry);
+endmodule
+
+module test;
+reg x,y;
+wire sum,carry;
+practice dut(x,y,sum,carry);
+initial
+begin
+x=1'b0;
+y=1'b0;
+#10
+x=1'b0;
+y=1'b1;
+#10
+x=1'b1;
+y=1'b0;
+#10
+x=1'b1;
+y=1'b1;
+end
+endmodule
 
