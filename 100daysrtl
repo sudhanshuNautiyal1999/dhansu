@@ -35,3 +35,37 @@ in=i;
 end
 end
 endmodule
+2) module graycounteightbit(clk,out,rst);
+input clk,rst;
+output reg [2:0] out;
+reg [2:0]count;
+always @(posedge clk)
+begin
+if (rst)
+begin
+count<=3'b000;
+out<=3'b000;
+end
+else
+begin
+count<=count+1'b1;
+out[2]<=count[2];
+out[1]<=count[2]^count[1];
+out[0]<=count[1]^count[0];
+end
+end
+endmodule
+module test;
+reg clk,rst;
+wire [2:0]out;
+practice dut(clk,out,rst);
+initial
+begin
+clk=1'b0;
+rst=1'b1;
+#6
+rst=1'b0;
+end
+always #5 clk=~clk;
+endmodule
+
