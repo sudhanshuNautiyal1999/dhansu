@@ -148,5 +148,92 @@ in=8'b00000001; #10;
 in=8'b00000000; # 10; 
 end
 endmodule
+5) 8_bit_barrel_shifter
+module mux2X1(in0,in1,out,sel);
+input in0,in1,sel;
+output out;
+wire w1,w2,w3;
+not(w1,sel);
+and(w2,w1,in0);
+and(w3,sel,in1);
+or(out,w2,w3);
+endmodule
+
+module barrel8bitshifter(in,out,s);
+input [7:0] in;
+input [2:0] s;
+output [7:0] out;
+wire [15:0]w;
+mux2X1 one(in[7],in[0],w[0],s[0]);
+mux2X1 two(in[6],in[7],w[1],s[0]);
+mux2X1 three(in[5],in[6],w[2],s[0]);
+mux2X1 four(in[4],in[5],w[3],s[0]);
+mux2X1 five(in[3],in[4],w[4],s[0]);
+mux2X1 six(in[2],in[3],w[5],s[0]);
+mux2X1 seven(in[1],in[2],w[6],s[0]);
+mux2X1 eight(in[0],in[1],w[7],s[0]);
+
+mux2X1 one1(w[0],w[6],w[8],s[1]);
+mux2X1 two2(w[1],w[7],w[9],s[1]);
+mux2X1 three3(w[2],w[0],w[10],s[1]);
+mux2X1 four4(w[3],w[1],w[11],s[1]);
+mux2X1 five5(w[4],w[2],w[12],s[1]);
+mux2X1 six6(w[5],w[3],w[13],s[1]);
+mux2X1 seven7(w[6],w[4],w[14],s[1]);
+mux2X1 eight8(w[7],w[5],w[15],s[1]);
+
+mux2X1 one11(w[8],w[12],out[7],s[2]);
+mux2X1 two22(w[9],w[13],out[6],s[2]);
+mux2X1 three33(w[10],w[14],out[5],s[2]);
+mux2X1 four44(w[11],w[15],out[4],s[2]);
+mux2X1 five55(w[12],w[8],out[3],s[2]);
+mux2X1 six66(w[13],w[9],out[2],s[2]);
+mux2X1 seven77(w[14],w[10],out[1],s[2]);
+mux2X1 eight88(w[15],w[11],out[0],s[2]);
+
+
+endmodule
+module tb;
+reg [7:0] in;
+reg [2:0] s;
+wire [7:0] out;
+practice dut(in,out,s);
+initial
+begin
+in=8'b00001111;
+s=3'b000;
+#10
+in=8'b00001111;
+s=3'b001;
+#10
+in=8'b00001111;
+s=3'b010;
+#10
+in=8'b00001111;
+s=3'b011;
+#10
+in=8'b00001111;
+s=3'b100;
+#10
+in=8'b00001111;
+s=3'b101;
+#10
+in=8'b00001111;
+s=3'b110;
+#10
+in=8'b00001111;
+s=3'b111;
+
+end
+endmodule
+S0 S1 S2 input      output
+0  0  0  00001111   00001111
+0  0  1  00001111   10000111
+0  1  0  00001111   11000011
+0  1  1  00001111   11100001
+1  0  0  00001111   11110000
+1  0  1  00001111   01111000
+1  1  0  00001111   00111100
+1  1  1  00001111   00011110
 
 
