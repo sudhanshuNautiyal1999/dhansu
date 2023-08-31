@@ -235,5 +235,88 @@ S0 S1 S2 input      output
 1  0  1  00001111   01111000
 1  1  0  00001111   00111100
 1  1  1  00001111   00011110
+6) 4*4 muliplier
+module Halfadder(a,b,s,c);
+input a,b;
+output s,c;
+xor(s,a,b);
+and(c,a,b);
+endmodule
+
+module Fulladder(a,b,cin,sum,cout);
+input a,b,cin;
+output sum,cout;
+wire w1,w2,w3;
+Halfadder HA1(a,b,w1,w2);
+Halfadder HA2(w1,cin,sum,w3);
+or(cout,w2,w3);
+endmodule
+
+module multiplier4X4(a,b,out);
+input [3:0] a,b;
+output [7:0] out;
+wire [32:0] w;
+and(out[0],a[0],b[0]);
+and(w[1],a[1],b[0]);
+and(w[2],a[0],b[1]);
+and(w[3],a[1],b[1]);
+and(w[4],a[2],b[0]);
+and(w[5],a[2],b[1]);
+and(w[6],a[3],b[0]);
+and(w[12],a[0],b[2]);
+and(w[14],a[1],b[2]);
+and(w[17],a[3],b[1]);
+and(w[20],a[0],b[3]);
+and(w[22],a[2],b[2]);
+and(w[25],a[3],b[2]);
+and(w[28],a[1],b[3]);
+and(w[30],a[2],b[3]);
+and(w[32],a[3],b[3]);
+Halfadder HA3(w[1],w[2],out[1],w[7]);
+Fulladder FA1(w[3],w[4],w[7],w[8] ,w[9]);
+Fulladder FA2(w[5],w[6],w[9],w[10],w[11]);
+Halfadder HA4(w[12],w[8],out[2],w[13]);
+Fulladder FA3(w[14],w[10],w[13],w[15],w[16]);
+Fulladder FA4(w[17],w[11],w[16],w[18],w[19]);
+Halfadder HA5(w[20],w[15],out[3],w[21]);
+Fulladder FA5(w[22],w[21],w[18],w[23],w[24]);
+Fulladder FA6(w[25],w[24],w[19],w[26],w[27]);
+Halfadder HA6(w[28],w[23],out[4],w[29]);
+Fulladder FA7(w[30],w[29],w[26],out[5],w[31]);
+Fulladder FA8(w[32],w[31],w[27],out[6],out[7]);
+endmodule
+module test;
+reg [3:0] a,b;
+wire [7:0] out;
+practice dut(a,b,out);
+initial
+begin
+a=4'b1000;
+b=4'b1000;
+#10
+a=4'b1010;
+b=4'b0011;
+#10
+a=4'b0001;
+b=4'b0001;
+#10
+a=4'b0001;
+b=4'b0000;
+#10
+a=4'b1101;
+b=4'b0011;
+#10
+a=4'b1111;
+b=4'b1111;
+#10
+a=4'b0000;
+b=4'b0000;
+#10
+a=4'b1001;
+b=4'b1001;
+
+end
+endmodule
+
 
 
