@@ -317,6 +317,62 @@ b=4'b1001;
 
 end
 endmodule
+7) 4 bit carry select adder
+module Fulladder(a,b,cin,sum,cout);
+input a,b,cin;
+output sum,cout;
+wire [2:0] w;
+xor(w[0],a,b);
+xor(sum,w[0],cin);
+and(w[1],w[0],cin);
+and(w[2],a,b);
+or(cout,w[1],w[2]);
+endmodule
+
+module mux2X1(in1,in2,sel,out);
+input in1,in2,sel;
+output out;
+wire [2:0]w;
+not(w[0],sel);
+and(w[1],in2,sel);
+and(w[2],in1,w[0]);
+or(out,w[1],w[2]);
+endmodule
+module carryselectadder(a,b,sum,cout);
+input [3:0]a,b;
+output cout;
+output [3:0]sum;
+wire [15:0] w;
+Fulladder FA1(a[0],b[0],1'b0,w[0],w[1]);
+Fulladder FA2(a[1],b[1],w[1],w[2],w[3]);
+Fulladder FA3(a[2],b[2],w[3],w[4],w[5]);
+Fulladder FA4(a[3],b[3],w[5],w[6],w[13]);
+
+Fulladder FA5(a[0],b[0],1'b1,w[7],w[8]);
+Fulladder FA6(a[1],b[1],w[8],w[9],w[10]);
+Fulladder FA7(a[2],b[2],w[10],w[11],w[12]);
+Fulladder FA8(a[3],b[3],w[12],w[14],w[15]);
+
+mux2X1 MUX1(w[0],w[7],1'b0,sum[0]);
+mux2X1 MUX2(w[2],w[9],1'b0,sum[1]);
+mux2X1 MUX3(w[4],w[11],1'b0,sum[2]);
+mux2X1 MUX4(w[6],w[14],1'b0,sum[3]);
+mux2X1 MUX5(w[13],w[15],1'b0,cout);
+endmodule
+
+module tb;
+reg [3:0]a,b;
+wire cout;
+wire [3:0] sum;
+practice dut(a,b,sum,cout);
+initial
+begin
+a=4'b1010;
+b=4'b0001;
+end
+endmodule
+
+
 
 
 
