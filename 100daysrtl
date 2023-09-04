@@ -149,6 +149,7 @@ in=8'b00000000; # 10;
 end
 endmodule
 5) 8_bit_barrel_shifter
+
 module mux2X1(in0,in1,out,sel);
 input in0,in1,sel;
 output out;
@@ -236,6 +237,7 @@ S0 S1 S2 input      output
 1  1  0  00001111   00111100
 1  1  1  00001111   00011110
 6) 4*4 muliplier
+
 module Halfadder(a,b,s,c);
 input a,b;
 output s,c;
@@ -318,6 +320,7 @@ b=4'b1001;
 end
 endmodule
 7) 4 bit carry select adder
+
 module Fulladder(a,b,cin,sum,cout);
 input a,b,cin;
 output sum,cout;
@@ -371,6 +374,75 @@ a=4'b1010;
 b=4'b0001;
 end
 endmodule
+8) 8X1 mux using 2:4 decoder
+
+module decoder(in1,in2,q);
+input in1,in2;
+output reg [3:0]q;
+always @(in1,in2)
+begin
+case({in1,in2})
+2'b00 : q=4'b0001;
+2'b01 : q=4'b0010;
+2'b10 : q=4'b0100;
+2'b11 : q=4'b1000;
+endcase
+end
+endmodule
+
+module mux(enable,in1,in2,sel,out);
+input enable,in1,in2,sel;
+output reg out;
+always @(enable,in1,in2,sel)
+begin
+if (enable)
+begin
+if (sel==1'b0)
+out=in1;
+else
+out=in2;
+end
+else
+out=1'b0;
+end
+endmodule
+
+module 8X1muxusingdecoder(in,sel,out);
+input [7:0] in;
+input [2:0] sel;
+output out;
+wire [3:0]w,o;
+decoder d1(sel[2],sel[1],w);
+mux m1(w[0],in[0],in[1],sel[0],o[0]);
+mux m2(w[1],in[2],in[3],sel[0],o[1]);
+mux m3(w[2],in[4],in[5],sel[0],o[2]);
+mux m4(w[3],in[6],in[7],sel[0],o[3]);
+or(out,o[0],o[1],o[2],o[3]);
+endmodule
+module tb;
+reg [7:0] in;
+reg [2:0] sel;
+wire out;
+practice dut(in,sel,out);
+initial
+begin
+sel=3'b000;
+in=8'b00000001;
+#10
+sel=3'b001;
+in=8'b00101001;
+#10
+sel=3'b111;
+in=8'b10000000;
+#10
+sel=3'b101;
+in=8'b00100000;
+end
+endmodule
+
+
+
+
 
 
 
