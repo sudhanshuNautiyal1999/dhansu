@@ -439,6 +439,106 @@ sel=3'b101;
 in=8'b00100000;
 end
 endmodule
+9) 1X8 demux using 1X4 demux and 1X2 demux
+
+module demux1X2(in,sel,out);
+input in,sel;
+output reg [1:0]out;
+always @(in,sel)
+begin
+if (sel==1'b0)
+begin
+out[0]=in;
+out[1]=1'b0;
+end
+else
+begin
+out[1]=in;
+out[0]=1'b0;
+end
+end
+endmodule
+
+module demux1X4(in,sel,out);
+input in;
+input [1:0] sel;
+output reg [3:0] out;
+always @(in,sel)
+begin
+if (sel==2'b00)
+begin
+out[0]=in;
+out[1]=1'b0;
+out[2]=1'b0;
+out[3]=1'b0;
+end
+else if (sel==2'b01)
+begin
+out[0]=1'b0;
+out[1]=in;
+out[2]=1'b0;
+out[3]=1'b0;
+end
+else if (sel==2'b10)
+begin
+out[0]=1'b0;
+out[1]=1'b0;
+out[2]=in;
+out[3]=1'b0;
+end
+else
+begin
+out[0]=1'b0;
+out[1]=1'b0;
+out[2]=1'b0;
+out[3]=in;
+end
+end
+endmodule
+
+module demux1X8(in,sel,out);
+input in;
+input [2:0]sel;
+output [7:0]out;
+wire [1:0]w;
+demux1X2 d1(in,sel[2],w);
+demux1X4 d2U(w[1],sel[1:0],out[7:4]);
+demux1X4 d3L(w[0],sel[1:0],out[3:0]);
+endmodule
+
+module tb;
+reg in;
+reg [2:0] sel;
+wire [7:0] out;
+practice dut(in,sel,out);
+initial
+begin
+in=1'b1;
+sel=3'b000;
+#5
+in=1'b1;
+sel=3'b001;
+#5
+in=1'b1;
+sel=3'b010;
+#5
+in=1'b1;
+sel=3'b011;
+#5
+in=1'b1;
+sel=3'b100;
+#5
+in=1'b1;
+sel=3'b101;
+#5
+in=1'b1;
+sel=3'b110;
+#5
+in=1'b1;
+sel=3'b111;
+end
+endmodule
+
 
 
 
