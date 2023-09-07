@@ -538,6 +538,64 @@ in=1'b1;
 sel=3'b111;
 end
 endmodule
+10) 2X4 decoder and two mux and one xor gate
+module decoder2X4(a,b,out);
+input a,b;
+output reg [3:0] out;
+always @(a,b)
+begin
+case({a,b})
+2'b00 : out=4'b0001;
+2'b01 : out=4'b0010;
+2'b10 : out=4'b0100;
+2'b11 : out=4'b1000;
+endcase
+end
+endmodule
+module mux2X1(a,b,sel,out);
+input a,b,sel;
+output reg out;
+always @(a,b,sel)
+begin
+if (sel==1'b0)
+out=a;
+else
+out=b;
+end
+endmodule
+
+
+module somerandomcircuit(a,b,c,d,out);
+input a,b,c,d;
+output out;
+wire [3:0]w;
+wire w1,w2;
+decoder2X4 d1(a,b,w);
+mux2X1 U(w[3],w[2],c,w1);
+mux2X1 D(w[1],w[0],d,w2);
+xor(out,w1,w2);
+endmodule
+
+module tb;
+reg a,b,c,d;
+reg check;
+wire out;
+practice dut(a,b,c,d,out);
+initial
+begin
+a=1'b0;
+b=1'b0;
+c=1'b0;
+d=1'b0;
+#0.5
+if ( out==(((a)&(~b)&(~d))|((a)&(b)&(d))|((a)&(~b)&(~c))|((~a)&(b)&(c))))
+check=1'b1;
+else
+check=1'b0;
+end
+
+endmodule
+
 
 
 
