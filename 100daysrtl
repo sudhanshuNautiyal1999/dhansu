@@ -595,6 +595,37 @@ check=1'b0;
 end
 
 endmodule
+11) 4 bit SISO shift register
+module practice(in,clk,out);
+input in,clk;
+output reg out;
+reg [2:0]q;
+always @(posedge clk)
+begin
+q[2]<=in;
+q[1]<=q[2];
+q[0]<=q[1];
+out<=q[0];
+end
+
+endmodule
+module tb;
+reg in,clk;
+wire out;
+practice dut(in,clk,out);
+initial
+begin
+clk=1'b0;
+in=1'b0;
+#10
+in=1'b1;
+#10
+in=1'b0;
+#10
+in=1'b1;
+end
+always #5 clk=~clk;
+endmodule
 
 
 
