@@ -629,7 +629,7 @@ endmodule
 
 12) 4 bit SIPO shift register
 
- module SIPO4bit(in,clk,out3,out2,out1,out0);
+module SIPO4bit(in,clk,out3,out2,out1,out0);
 input in,clk;
 output reg out3,out2,out1,out0;
 always @(posedge clk)
