@@ -662,6 +662,45 @@ $stop();
 end
 always #5 clk=!clk;
 endmodule
+13) 4 bit PISO shift register
+ module piso(in,clk,reset,out);
+input [3:0]in;
+input clk,reset;
+output reg out;
+reg [2:0] q;
+always @(posedge clk)
+begin
+if (reset)
+begin
+q[2]<=in[3];
+q[1]<=in[2];
+q[0]<=in[1];
+out<=in[0];
+end
+else
+begin
+q[2]<=1'bx;
+q[1]<=q[2];
+q[0]<=q[1];
+out<=q[0];
+end
+end
+endmodule
+module tb;
+reg [3:0] in;
+reg clk,reset;
+wire out;
+practice dut(in,clk,reset,out);
+initial
+begin
+clk=1'b0;
+reset=1'b1;
+in=4'b1001;
+#6
+reset=1'b0;
+end
+always #5 clk=~clk;
+endmodule
 
 
 
