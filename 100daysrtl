@@ -742,6 +742,68 @@ rst=1'b0;
 end
 always #5 clk=~clk;
 endmodule
+15) 4 bit asynchronous Simultaneous “Up” and “Down” Counter
+module jkf(j,k,clk,out,outbar,rst);
+input j,k,clk,rst;
+output reg out,outbar;
+wire w1,w2,w3,w4;
+always @(posedge clk)
+begin
+if(rst==1'b1)
+begin
+out<=1'b0;
+outbar<=1'b1;
+end
+else if(j==1'b0 && k==1'b1)
+begin
+out<=1'b0;
+outbar<=1'b1;
+end
+else if(j==1'b1 && k==1'b0)
+begin
+out<=1'b1;
+outbar<=1'b0;
+end
+else if(j==1'b1 && k==1'b1)
+begin
+out<=~out;
+outbar<=~outbar;
+end
+else
+begin
+out<=out;
+outbar<=outbar;
+end
+
+end
+endmodule
+
+
+module asyncountre(clk,rst,outup,outdown);
+input clk,rst;
+output [3:0] outup,outdown;
+jkf d1(1'b1,1'b1,clk,outup[0],outdown[0],rst);
+jkf d2(1'b1,1'b1,outdown[0],outup[1],outdown[1],rst);
+jkf d3(1'b1,1'b1,outdown[1],outup[2],outdown[2],rst);
+jkf d4(1'b1,1'b1,outdown[2],outup[3],outdown[3],rst);
+
+endmodule
+
+module tb;
+reg clk,rst;
+wire [3:0] outup,outdown;
+practice dut(clk,rst,outup,outdown);
+initial
+begin
+clk=1'b0;
+rst=1'b1;
+#6
+rst=1'b0;
+end
+always #5 clk=~clk;
+endmodule
+
+
 
 
 
