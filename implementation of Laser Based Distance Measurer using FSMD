@@ -1,0 +1,76 @@
+module practice(clk,rst,button,reflected,light,distance);
+input clk,rst,button,reflected;
+output reg light;
+output reg [5:0] distance;
+parameter S0=4'b0000,S1=4'b0001,S2=4'b0010,S3=4'b0100,S4=4'b1000;
+reg [3:0] ps,ns;
+reg [5:0] count;
+always @(posedge clk)
+begin
+if (rst)
+ps=S0;
+else
+ps=ns;
+end
+always @(ps,button,reflected)
+begin
+case(ps)
+S0 : ns=S1;
+S1 : ns=button?S2:S1;
+S2 : ns=S3;
+S3 : ns=reflected?S4:S3;
+S4 : ns=S1;
+endcase
+end
+always @(posedge clk)
+begin
+if(rst)
+begin
+distance<=6'b000000;
+light<=1'b0;
+count<=6'b000000;
+end
+else if(ps==S1)
+begin
+light<=1'b0;
+end
+else if(ps==S2)
+begin
+light<=1'b1;
+end
+else if(ps==S3)
+begin
+light<=1'b0;
+count<=count+1'b1;
+end
+else if(ps==S4)
+begin
+distance<=count>>1;
+light<=1'b0;
+end
+end
+endmodule
+
+module tb;
+reg clk,rst,button,reflected;
+wire light;
+wire [5:0] distance;
+practice dut(clk,rst,button,reflected,light,distance);
+initial
+begin
+clk=1'b0;
+rst=1'b1;
+reflected=1'b0;
+#10
+rst=1'b0;
+button=1'b1;
+#30
+button=1'b0;
+#90//change here
+#5
+reflected=1'b1;
+#10
+$stop();
+end
+always #5 clk=~clk;
+endmodule
