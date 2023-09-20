@@ -877,7 +877,7 @@ q2<=0;
 else
 q2<=in;
 end
-always @(q1,q2)
+always @(q1,q2,clk)
 begin
 if (clk==1'b1)
 out=q1;
