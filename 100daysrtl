@@ -803,6 +803,60 @@ end
 always #5 clk=~clk;
 endmodule
 
+16) MOD 10 Asynchronous counter 
+The below code work fine on simulator(eda playground but not in quartus prime)
+
+module asycounter10(clk,out,rst);
+input clk,rst;
+output reg [3:0] out;
+wire w;
+always @(negedge clk or posedge w)
+begin
+if(rst==1'b1 || w==1'b1 )
+out[0]<=1'b0;
+else
+out[0]<=~out[0];
+end
+always @(negedge out[0] or posedge w)
+begin
+if(rst==1'b1 || w==1'b1)
+out[1]<=1'b0;
+else
+out[1]<=~out[1];
+end
+always @(negedge out[1] or posedge w )
+begin
+if(rst==1'b1 || w==1'b1)
+out[2]<=1'b0;
+else
+out[2]<=~out[2];
+end
+always @(negedge out[2] or posedge w )
+begin
+if(rst==1'b1 || w==1'b1)
+out[3]<=1'b0;
+else
+out[3]<=~out[3];
+end
+assign  #1 w=out[3]&out[1];//provide delay for correct operation
+endmodule
+
+module tb;
+reg clk,rst;
+wire [3:0] out;
+asycounter10 dut(clk,out,rst);
+initial
+begin
+clk=1'b0;
+rst=1'b0;
+#11
+rst=1'b1;
+#22
+rst=1'b0;
+end
+always #5 clk=~clk;
+endmodule
+
 
 
 
