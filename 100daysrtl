@@ -857,6 +857,55 @@ end
 always #5 clk=~clk;
 endmodule
 
+17) Dual Edge Triggered Flip Flop
+
+module DDFF(in,out,clk,rst);
+input in,clk,rst;
+output reg out;
+reg q1,q2;
+always @(posedge clk)
+begin
+if (rst)
+q1<=0;
+else
+q1<=in;
+end
+always @(negedge clk)
+begin
+if (rst)
+q2<=0;
+else
+q2<=in;
+end
+always @(q1,q2)
+begin
+if (clk==1'b1)
+out=q1;
+else
+out=q2;
+end
+endmodule
+
+module tb;
+reg in,clk,rst;
+wire out;
+DDFF dut(in,out,clk,rst);
+initial
+begin
+clk=1'b0;
+rst=1'b1;
+in=1'b1;
+#11
+rst=1'b0;
+in=1'b1;
+#10
+in=1'b0;
+#10
+in=1'b1;
+end
+always #5 clk=~clk;
+endmodule
+
 
 
 
