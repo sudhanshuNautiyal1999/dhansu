@@ -906,6 +906,37 @@ end
 always #5 clk=~clk;
 endmodule
 
+18) Design synchronous counter for the 3-7-0-6-4-1 sequence using D Flip Flop
+
+module syncounter(clk,rst,q);
+input clk,rst;
+output reg [3:1] q;
+always @(posedge clk)
+begin
+if(rst)
+q<=3'b011;
+else
+begin
+q[3]<=((~q[3])&q[2])|(q[2]&(~q[1]))|((~q[3])&(~q[1]));
+q[2]<=~q[3];
+q[1]<=((~q[3])&q[1])|(q[3]&(~q[2]));
+end
+end
+endmodule
+module tb;
+reg clk,rst;
+wire [3:1] q;
+syncounter dut(clk,rst,q);
+initial
+begin
+clk=1'b0;
+rst=1'b1;
+#7
+rst=1'b0;
+end
+always # 5 clk=~clk;
+endmodule
+
 
 
 
