@@ -937,6 +937,48 @@ end
 always # 5 clk=~clk;
 endmodule
 
+19) 4bit johnson counter
+
+module DFF(clk,rst,in,out,outbar);
+input clk,rst,in;
+output reg out,outbar;
+always @(posedge clk)
+begin
+if(rst)
+begin
+out<=1'b0;
+outbar<=1'b1;
+end
+else
+begin
+out<=in;
+outbar<=~in;
+end
+end
+endmodule
+module johncounter(clk,rst,out,outbar);
+input clk,rst;
+output [3:0] out,outbar;
+DFF d3(clk,rst,outbar[0],out[3],outbar[3]);
+DFF d2(clk,rst,out[3],out[2],outbar[2]);
+DFF d1(clk,rst,out[2],out[1],outbar[1]);
+DFF d0(clk,rst,out[1],out[0],outbar[0]);
+endmodule
+
+module tb;
+reg clk,rst;
+wire [3:0] out,outbar;
+johncounter dut(clk,rst,out,outbar);
+initial
+begin
+clk=1'b0;
+rst=1'b1;
+#7
+rst=1'b0;
+end
+always #5 clk=~clk;
+endmodule
+
 
 
 
