@@ -1,0 +1,128 @@
+
+
+module votingmachine(clk,rst,used,start,picked,on,candinate1,candinate2,candinate3,candinate4);
+input clk,rst,used,start,on;
+input [4:1] picked;
+output reg [7:0] candinate1,candinate2,candinate3,candinate4;
+parameter idle=4'b0000,scan=4'b0001,checked=4'b0010,authentication=4'b0100,Picked=4'b1000,votedisplay=4'b1111;
+reg [3:0] ps,ns;
+reg [7:0] candinate1e,candinate2e,candinate3e,candinate4e;
+
+always @(posedge clk)
+begin
+if(rst)
+ps<=idle;
+else
+ps<=ns;
+end
+
+always @(ps,used,start,picked,on)
+begin
+case(ps)
+idle : ns=start?scan:idle;
+scan : ns=checked;
+checked : ns=used?scan:authentication;
+authentication : ns=Picked;
+Picked : ns=votedisplay;
+votedisplay : ns=on?scan:idle;
+endcase
+end
+
+always @(ps,picked)
+begin
+if(ps==idle)
+begin
+candinate1=8'b00000000;
+candinate2=8'b00000000;
+candinate3=8'b00000000;
+candinate4=8'b00000000;
+candinate1e=8'b00000000;
+candinate2e=8'b00000000;
+candinate3e=8'b00000000;
+candinate4e=8'b00000000;
+end
+else if(ps==Picked)
+begin
+if (picked==4'b1000)
+candinate4e=candinate4e+1'b1;
+else if (picked==4'b0100)
+candinate3e=candinate3e+1'b1;
+else if(picked==4'b0010)
+candinate2e=candinate2e+1'b1;
+else if(picked==4'b0001)
+candinate1e=candinate1e+1'b1;
+end
+else if(ps==votedisplay)
+begin
+candinate1=candinate1e;
+candinate2=candinate2e;
+candinate3=candinate3e;
+candinate4=candinate4e;
+end
+end
+endmodule
+
+module tb;
+reg clk,rst,used,start,on;
+reg [4:1] picked;
+wire [7:0] candinate1,candinate2,candinate3,candinate4;
+votingmachine dut(clk,rst,used,start,picked,on,candinate1,candinate2,candinate3,candinate4);
+initial
+begin
+clk=1'b0;
+rst=1'b1;
+used=1'b0;
+picked=4'b1000;
+on=1'b1;
+#10
+rst=1'b0;
+start=1'b1;
+#10
+start=1'b0;
+#40
+picked=4'b1000;
+#60
+picked=4'b1000;
+#50
+picked=4'b1000;
+#50
+picked=4'b1000;
+#50
+picked=4'b1000;
+#50
+picked=4'b1000;
+#50
+picked=4'b1000;
+#50
+picked=4'b1000;
+#50
+picked=4'b1000;
+#50
+picked=4'b1000;
+#50
+picked=4'b1000;
+#50
+picked=4'b1000;
+#50
+picked=4'b1000;
+#50
+picked=4'b1000;
+#50
+picked=4'b1000;
+#50
+picked=4'b1000;
+#50
+picked=4'b0001;
+#50
+picked=4'b1000;
+#50
+picked=4'b1000;
+on=1'b0;
+start=1'b0;
+
+end
+always #5 clk=~clk;
+endmodule
+
+
+
