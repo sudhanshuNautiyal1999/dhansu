@@ -1019,6 +1019,97 @@ end
 always # 5 clk=~clk;
 endmodule
 
+21) 11011 FSM overlapping Morre machine
+ module fsm(clk,rst,in,out);
+input clk,rst,in;
+output reg out;
+parameter A=3'b000,B=3'b001,C=3'b010,D=3'b100,E=3'b111,F=3'b110;
+reg [2:0] ps,ns;
+always @(posedge clk)
+begin
+if(rst)
+ps<=A;
+else
+ps<=ns;
+end
+always @(ps,in)
+begin
+case(ps)
+A : begin
+ns=in?B:A;
+out=1'b0;
+end
+B : begin
+ns=in?C:A;
+out=1'b0;
+end
+C : begin
+ns=in?C:D;
+out=1'b0;
+end
+D : begin
+ns=in?E:A;
+out=1'b0;
+end
+E : begin
+ns=in?F:A;
+out=1'b0;
+end
+F : begin
+ns=in?C:D;
+out=1'b1;
+end
+endcase
+end
+endmodule
+
+module tb;
+reg clk,rst,in;
+wire out;
+fsm dut(clk,rst,in,out);
+initial
+begin
+clk=1'b0;
+rst=1'b1;
+in=1'b1;
+#6
+rst=1'b0;
+#19
+in=1'b1;
+#10
+in=1'b1;
+#10
+in=1'b1;
+#10
+in=1'b1;
+#10
+in=1'b1;
+#10
+in=1'b0;
+#10
+in=1'b1;
+#10
+in=1'b1;
+#10;
+in=1'b0;
+#10
+in=1'b0;
+#10
+in=1'b0;
+#10
+in=1'b1;
+#10;
+in=1'b1;
+#10
+in=1'b0;
+#10
+in=1'b1;
+#10
+in=1'b1;
+end
+always #5 clk=~clk;
+endmodule
+
 
 
 
