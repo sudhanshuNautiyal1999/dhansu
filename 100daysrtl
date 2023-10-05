@@ -1206,6 +1206,109 @@ end
 always #5 clk=~clk;
 endmodule
 
+23) 1001 & 010 overlapping mealy FSM
+
+module mealy(clk,rst,in,out);
+input clk,rst,in;
+output reg out;
+parameter S0=4'b0000,S1=4'b0001,S2=4'b0010,S3=4'b0100,S4=4'b1000,S5=4'b1100;
+reg [3:0] ns,ps;
+always @(posedge clk)
+begin
+if(rst)
+ps<=S0;
+else
+ps<=ns;
+end
+
+always @(ps,in)
+begin
+case(ps)
+S0: begin
+ns=in?S1:S4;
+out=1'b0;
+end
+S1: begin
+ns=in?S1:S2;
+out=1'b0;
+end
+S2: begin
+ns=in?S5:S3;
+out=1'b0;
+end
+S3: begin
+ns=in?S5:S4;
+out=in?1'b1:1'b0;
+end
+S4: begin
+ns=in?S5:S4;
+out=1'b0;
+end
+S5: begin
+ns=in?S1:S2;
+out=in?1'b0:1'b1;
+end
+endcase
+end
+endmodule
+
+module tb;
+reg clk,rst,in;
+wire out;
+mealy dut(clk,rst,in,out);
+initial
+begin
+clk=1'b0;
+rst=1'b1;
+in=1'b1;
+#6
+rst=1'b0;
+#9
+in=1'b0;
+#10
+in=1'b0;
+#10
+in=1'b1;
+#10
+in=1'b0;
+#10
+in=1'b0;
+#10
+in=1'b0;
+#10
+in=1'b0;
+#10
+in=1'b1;
+#10
+in=1'b0;
+#10
+in=1'b1;
+#10
+in=1'b0;
+#10
+in=1'b0;
+#10
+in=1'b1;
+#10
+in=1'b0;
+#10
+in=1'b1;
+#10
+in=1'b0;
+#10
+in=1'b0;
+#10
+in=1'b1;
+#10
+in=1'b0;
+#10
+in=1'b1;
+
+
+end
+always #5 clk=~clk;
+endmodule
+
 
 
 
