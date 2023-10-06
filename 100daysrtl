@@ -1303,11 +1303,70 @@ in=1'b1;
 in=1'b0;
 #10
 in=1'b1;
-
-
 end
 always #5 clk=~clk;
 endmodule
+
+24) 2's complement of a binary number using Moore FSM
+
+module (clk,rst,in,out);
+input clk,rst,in;
+output reg out;
+parameter A=2'b00,B=2'b01,C=2'b10;
+reg [1:0] ps,ns;
+always @(posedge clk)
+begin
+if(rst)
+ps<=A;
+else
+ps<=ns;
+end
+
+always @(ps,in)
+begin
+case(ps)
+A : begin
+ns=in?B:A;
+out=1'b0;
+end
+B : begin
+ns=in?C:B;
+out=1'b1;
+end
+C : begin
+ns=in?C:B;
+out=1'b0;
+end
+endcase
+end
+endmodule
+
+module tb;
+reg clk,rst,in;
+wire out;
+complement dut(clk,rst,in,out);
+initial
+begin
+clk=1'b0;
+rst=1'b1;
+#6
+rst=1'b0;
+#9
+in=1'b0;
+#10
+in=1'b0;
+#10
+in=1'b1;
+#10
+in=1'b0;
+#10
+in=1'b0;
+#10
+in=1'b1;
+end
+always #5 clk=~clk;
+endmodule
+
 
 
 
