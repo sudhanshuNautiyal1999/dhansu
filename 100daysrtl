@@ -1367,6 +1367,85 @@ end
 always #5 clk=~clk;
 endmodule
 
+25) Vending machine using mealy machine with change
+In this, we will get drink bottle when price = 15 , and we have only 5 and 10 avialable
+
+module machine(clk,rst,coin,bottlereceived,change);
+input clk,rst;
+input [3:0] coin;
+output reg bottlereceived;
+output reg [3:0] change;
+parameter S0=2'b00,S1=2'b01,S2=2'b10;
+reg [1:0] ps,ns;
+
+always @(posedge clk)
+begin
+if(rst)
+ps<=S0;
+else
+ps<=ns;
+end
+
+always @(ps,coin)
+begin
+case(ps)
+S0 : begin
+ns = (coin==4'b0101) ? S1 : ((coin==4'b1010) ? S2:S0);
+bottlereceived = 1'b0;
+change = 4'b0000;
+end
+S1 : begin
+ns = (coin==4'b0101) ? S2 : S0;
+bottlereceived = (coin==4'b1010) ? 1'b1 : 1'b0;
+change = (coin==4'b0000) ? 4'b0101 : 4'b0000;
+end
+S2 : begin
+ns = S0;
+bottlereceived = (coin==4'b0101 || coin==4'b1010) ? 1'b1 : 1'b0;
+change = (coin==4'b1010)? 4'b0101 : ((coin==4'b0000) ? 4'b1010 : 4'b0000);
+end
+endcase
+end
+endmodule
+
+module tb;
+reg clk,rst;
+reg [3:0] coin;
+wire bottlereceived;
+wire [3:0] change;
+machine dut(clk,rst,coin,bottlereceived,change);
+initial
+begin
+clk=1'b0;
+rst=1'b1;
+#6
+rst=1'b0;
+#9
+coin=4'b0101;
+#10;
+coin=4'b0101;
+#10;
+coin=4'b0101;
+#10;
+coin=4'b0101;
+#10;
+coin=4'b1010;
+#10;
+coin=4'b1010;
+#10;
+coin=4'b0101;
+#10;
+coin=4'b1010;
+#10;
+coin=4'b1010;
+#10;
+coin=4'b1010;
+#10;
+coin=4'b0000;
+end
+always #5 clk=~clk;
+endmodule
+
 
 
 
