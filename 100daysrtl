@@ -1,5 +1,5 @@
 1) 3 to 8 decoder
-   module practice(in,out);
+module decoder3X8(in,out);
 input [2:0] in;
 output [7:0] out;
 reg [7:0]out;
@@ -25,7 +25,7 @@ module test;
 reg [2:0]in;
 wire [7:0]out;
 integer i;
-practice dut(in,out);
+decoder3X8 dut(in,out);
 initial
 begin
 for (i=0;i<8;i=i+1)
@@ -367,7 +367,7 @@ module tb;
 reg [3:0]a,b;
 wire cout;
 wire [3:0] sum;
-practice dut(a,b,sum,cout);
+carryselectadder dut(a,b,sum,cout);
 initial
 begin
 a=4'b1010;
@@ -1445,6 +1445,54 @@ coin=4'b0000;
 end
 always #5 clk=~clk;
 endmodule
+
+26) single port SRAM with Synchronous read/write
+
+module sram(clk,datain,dataout,enablewrite,readaddress,writeaddress);
+input clk,enablewrite;
+input [7:0] datain;
+input [5:0] readaddress,writeaddress;
+output reg [7:0] dataout;
+reg [7:0] ram [63:0];
+
+always @(posedge clk)
+begin
+if(enablewrite)
+ram[writeaddress]<=datain;
+dataout<=ram[readaddress];
+end
+endmodule
+
+module tb;
+reg clk,enablewrite;
+reg [5:0] readaddress,writeaddress;
+reg [7:0] datain;
+wire [7:0] dataout;
+sram dut(clk,datain,dataout,enablewrite,readaddress,writeaddress);
+initial
+begin
+clk=1'b0;
+enablewrite=1'b0;
+datain=8'b00000000;
+#12
+enablewrite=1'b1;
+datain=8'b11110000;
+writeaddress=6'b000000;
+readaddress=6'b000000;
+#10
+datain=8'b11111111;
+writeaddress=6'b000000;
+readaddress=6'b000000;
+
+end
+initial
+begin
+#30
+$finish();
+end
+always #5 clk=~clk;
+endmodule
+
 
 
 
