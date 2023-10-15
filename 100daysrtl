@@ -1493,6 +1493,98 @@ end
 always #5 clk=~clk;
 endmodule
 
+27) Synchronous FIFO
+
+module fifo(clk,rst,wen,ren,data,dataout,full,empty);
+input clk,rst,wen,ren;
+input [7:0] data;
+output reg [7:0] dataout;
+output full,empty;
+reg [7:0] memory [15:0];
+reg [3:0] wrptr,rdptr;
+integer i;
+always @(posedge clk)
+begin
+if (rst)
+begin
+for(i=0;i<16;i=i+1)
+memory[i]=8'b00000000;
+wrptr<=4'b0000;
+dataout<=8'b00000000;
+rdptr<=4'b0000;
+end
+// write
+else if (wen==1'b1)
+begin
+if (wrptr <  4'b1111)
+begin
+memory[wrptr]<=data;
+wrptr<=wrptr+1'b1;
+end
+else if(wrptr==4'b1111)
+begin
+memory[wrptr]<=data;
+end
+end
+
+//read
+else if(ren==1'b1)
+begin
+if(rdptr!=wrptr)
+begin
+dataout<=memory[rdptr];
+memory[rdptr]<=8'b00000000;
+rdptr<=rdptr+1'b1;
+end
+else if(rdptr==wrptr)
+begin
+dataout<=memory[rdptr];
+memory[rdptr]<=8'b00000000;
+wrptr<=4'b0000;
+rdptr<=4'b0000;
+end
+end
+end
+assign empty=(rdptr==wrptr)?1'b1:1'b0;
+assign full=(wrptr==4'b1111)?1'b1:1'b0;
+endmodule
+
+module tb;
+reg clk,rst,wen,ren;
+reg [7:0] data;
+wire [7:0] dataout;
+wire full,empty;
+fifo dut(clk,rst,wen,ren,data,dataout,full,empty);
+initial
+begin
+clk=1'b0;
+rst=1'b1;
+#6
+rst=1'b0;
+wen=1'b1;
+#9
+data=8'b01010101;
+#10;
+data=8'b10101010;
+#10;
+data=8'b00001111;
+#10;
+data=8'b11110000;
+#10;
+data=8'b00110011;
+#10;
+data=8'b11001100;
+#10;
+data=8'b11100011;
+#10;
+data=8'b00011100;
+#5;
+wen=1'b0;
+#5
+ren=1'b1;
+end
+always #5 clk=~clk;
+endmodule
 
 
 
