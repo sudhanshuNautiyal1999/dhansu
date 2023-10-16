@@ -1586,6 +1586,59 @@ end
 always #5 clk=~clk;
 endmodule
 
+28) Generate output = 1 for 4 clock cycle and for next 4 clock cycle output = 0. Repeat this sequence for forever
+
+module clk4(clk,rst,out);
+input clk,rst;
+output reg out;
+reg [3:0] pose,nege;
+always @(posedge clk)
+begin
+if (rst)
+begin
+pose=4'b0000;
+nege=4'b0000;
+out=1'b0;
+end
+else
+begin
+if((pose<4'b0100) && ((nege==4'b0000) || (nege>=4'b0100)))
+begin
+out=1'b1;
+pose=pose+1'b1;
+nege=4'b0000;
+end
+else if (pose >= 4'b0100)
+begin
+out=1'b0;
+nege=nege+1'b1;
+pose=4'b0000;
+end
+else if (nege < 4'b0100)
+begin
+out=1'b0;
+nege=nege+1'b1;
+pose=4'b0000;
+end
+end
+end
+endmodule
+
+module tb;
+reg clk,rst;
+wire out;
+clk4 dut(clk,rst,out);
+initial
+begin
+clk=1'b0;
+rst=1'b1;
+#6
+rst=1'b0;
+end
+always # 5 clk=~clk;
+endmodule
+
+
 
 
 
