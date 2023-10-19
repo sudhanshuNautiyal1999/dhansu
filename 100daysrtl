@@ -1638,6 +1638,94 @@ end
 always # 5 clk=~clk;
 endmodule
 
+29) Moore FSM gives output 1 when detects even number of ones recived else output is 0
+
+module even(clk,rst,in,out);
+input clk,rst,in;
+output reg out;
+parameter S0=3'b100,S1=3'b010,S2=3'b001;
+reg [2:0] ps,ns;
+always @(posedge clk)
+begin
+if(rst)
+ps<=S0;
+else
+ps<=ns;
+end
+
+always @(ps,in)
+begin
+case(ps)
+S0 : begin
+ns=in?S1:S0;
+out=1'b0;
+end
+S1 : begin
+ns=in?S2:S1;
+out=1'b0;
+end
+S2 : begin
+ns=in?S1:S0;
+out=1'b1;
+end
+endcase
+end
+endmodule
+
+module tb;
+reg clk,rst,in;
+wire out;
+even dut(clk,rst,in,out);
+initial
+begin
+clk=1'b0;
+rst=1'b1;
+#6
+rst=1'b0;
+#9
+in=1'b1;
+#10
+in=1'b0;
+#10
+in=1'b0;
+#10
+in=1'b1;
+#10
+in=1'b1;
+#10
+in=1'b1;
+#10
+in=1'b0;
+#10
+in=1'b1;
+#10
+in=1'b1;
+#10
+in=1'b0;
+#10
+in=1'b1;
+#10
+in=1'b0;
+#10
+in=1'b0;
+#10
+in=1'b1;
+#10
+in=1'b0;
+#10
+in=1'b1;
+#10
+in=1'b1;
+#10
+in=1'b0;
+#10
+in=1'b1;
+#10
+in=1'b1;
+end
+always #5 clk=~clk;
+endmodule
+
 
 
 
