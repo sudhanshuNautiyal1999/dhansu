@@ -1726,6 +1726,71 @@ end
 always #5 clk=~clk;
 endmodule
 
+30) Design a synchronous Traffic light controller cicuit
+
+module trafficlight(clk,rst,red,green,yellow);
+input clk,rst;
+output  red,green,yellow;
+parameter GREEN = 3'b000 ,YELLOW = 3'b001 ,RED = 3'b010 ,REDYELLOW = 3'b100 ,WAITED = 3'b111;
+reg [2:0] ps,ns;
+reg [5:0] count;
+
+always @(posedge clk)
+begin
+if(rst)
+ps <= GREEN;
+else
+ps <= ns;
+end
+
+always @(ps,count)
+begin
+case(ps)
+GREEN : ns = (count == 6'b001111) ? YELLOW : GREEN;
+YELLOW : ns = (count == 6'b010100) ? RED : YELLOW;
+RED : ns = (count == 6'b011110) ? REDYELLOW : RED;
+REDYELLOW : ns = (count == 6'b100011) ? WAITED : REDYELLOW;
+WAITED : ns = GREEN;
+endcase
+end
+
+always @(posedge clk)
+begin
+if(rst)
+count <= 5'b000000;
+else if (ps == WAITED)
+count <= 5'b000000;
+else
+count <= count + 1'b1;
+end
+
+assign red = (ps == RED || ps == REDYELLOW) ? 1'b1 : 1'b0;
+assign yellow = (ps == YELLOW || ps == REDYELLOW) ? 1'b1 : 1'b0;
+assign green = (ps == GREEN) ? 1'b1 : 1'b0;
+endmodule
+
+module tb;
+reg clk,rst;
+wire red,green,yellow;
+trafficlight dut(clk,rst,red,green,yellow);
+
+initial
+begin
+clk = 1'b0;
+rst = 1'b1;
+#6
+rst = 1'b0;
+
+end
+always #5 clk = ~clk;
+endmodule
+
+
+
+
+
+
+
 
 
 
