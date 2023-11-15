@@ -1,0 +1,167 @@
+module master(clkm,rstm,in,newidvalid,chipselectm,last,send,collectinm);
+input clkm,rstm,newidvalid,chipselectm;
+input [11:0] in ;
+output last,send;
+output collectinm;
+parameter idle = 4'b0000 , newid = 4'b0001 , slavechipselectm = 4'b0010 , datain = 4'b0100 , endtaskspim = 4'b1000;
+reg [3:0] ns , ps;
+reg [3:0] datacountm;
+wire lastoutm;
+
+always @(posedge clkm)
+begin
+if(rstm)
+begin
+ps <= idle;
+end
+else
+ps <= ns;
+end
+
+always @(ps,newidvalid,chipselectm,in,lastoutm)
+begin
+case(ps)
+idle : ns = newid;
+
+newid : ns = newidvalid ? slavechipselectm : newid;
+
+slavechipselectm : ns = chipselectm ? datain : slavechipselectm;
+
+datain : ns = lastoutm ? endtaskspim : datain;
+
+endtaskspim : ns = idle;
+
+endcase
+
+end
+
+always @(posedge clkm)
+begin
+if(rstm)
+datacountm <= 4'b0000;
+else if(( ps== datain ) && (datacountm < 4'b1100))
+begin
+datacountm <= datacountm + 1'b1;
+end
+else
+datacountm <= 4'b0000;
+end
+
+assign collectinm = (last == 1'b1) ? 1'b0 : in[datacountm];
+assign lastoutm = (datacountm == 4'b1100) ? 1'b1 : 1'b0;
+assign last = lastoutm;
+assign send = (ps == endtaskspim) ? 1'b1 : 1'b0;
+
+endmodule
+
+module slave(clks,rsts,chipselects,recived,out,collectins);
+input clks,rsts,chipselects, collectins;
+output recived;
+output reg [11:0] out;
+parameter slavechipselects = 3'b001 , dataout = 3'b010 , endtaskspis = 3'b100;
+wire lastouts;
+reg [3:0] datacounts;
+reg [2:0] ps,ns;
+
+always @(posedge clks)
+begin
+if (rsts)
+begin
+ps <= slavechipselects;
+end
+else
+ps <= ns;
+end
+
+always @(ps,chipselects,lastouts)
+begin
+case(ps)
+slavechipselects : ns = chipselects ? dataout : slavechipselects;
+dataout : ns = lastouts ? endtaskspis : dataout;
+endtaskspis : ns = slavechipselects;
+endcase
+end
+
+always @(posedge clks)
+begin
+if(rsts)
+begin
+datacounts <= 4'b0000;
+out <= 12'b000000000000;
+end
+else if (ps == slavechipselects)
+out <= 12'b000000000000;
+else if (( ps == dataout ) &&  (datacounts < 4'b1100))
+begin
+out[datacounts] = collectins;
+datacounts <= datacounts + 1'b1;
+end
+else
+datacounts <= 4'b0000;
+end
+
+assign recived = (ps == endtaskspis) ? 1'b1 : 1'b0;
+assign lastouts = (datacounts == 4'b1100) ? 1'b1 : 1'b0;
+
+endmodule
+
+
+module spi(clk,rst,spiin,newidvalid,chipselect,last,send,recived,spiout);
+input clk,rst,chipselect,newidvalid;
+input [11:0] spiin;
+output recived,last,send;
+output [11:0] spiout;
+wire masterout;
+
+master m(clk,rst,spiin,newidvalid,chipselect,last,send,masterout);
+slave  s(clk,rst,chipselect,recived,spiout,masterout);
+
+endmodule
+
+
+module tb;
+reg clk,rst,newidvalid,chipselect;
+reg [11:0] spiin;
+wire last,send,recived;
+wire [11:0] spiout;
+spi dut(clk,rst,spiin,newidvalid,chipselect,last,send,recived,spiout);
+initial
+begin
+clk=1'b0;
+rst=1'b1;
+newidvalid=1'b0;
+chipselect=1'b0;
+spiin = 12'b111111000000;
+#6;
+rst=1'b0;
+#9;
+newidvalid = 1'b1;
+#10;
+newidvalid = 1'b0;
+#10;
+chipselect = 1'b1;
+#10;
+chipselect = 1'b0;
+#150;
+spiin = 12'b101010101010;
+#15;
+newidvalid = 1'b1;
+#10;
+newidvalid = 1'b0;
+#10;
+chipselect = 1'b1;
+#10;
+chipselect = 1'b0;
+#150;
+spiin = 12'b101000000010;
+#15;
+newidvalid = 1'b1;
+#10;
+newidvalid = 1'b0;
+#10;
+chipselect = 1'b1;
+#10;
+chipselect = 1'b0;
+end
+always #5 clk= !clk;
+endmodule
