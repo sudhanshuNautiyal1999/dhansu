@@ -1785,6 +1785,9 @@ end
 always #5 clk = ~clk;
 endmodule
 
+31) Lfsr5 ( TAKEN FROM HDLBITS)
+
+
 
 
 
