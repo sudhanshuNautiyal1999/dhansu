@@ -1804,7 +1804,7 @@ module lfsr5(clk,reset,q);
         end
 endmodule
 
-32 A 100-bit binary adder. The adder adds two 100-bit numbers and a carry-in to produce a 100-bit sum and
+32) A 100-bit binary adder. The adder adds two 100-bit numbers and a carry-in to produce a 100-bit sum and
    carry out. (https://hdlbits.01xz.net/wiki/Adder100)
 
  module Fulladder(in1,in2,carryin,sum,carryout);
@@ -1833,7 +1833,52 @@ module adder100(a,b,cin,cout,sum);
     endgenerate
     Fulladder f3(a[99],b[99],w[98],sum[99],cout);
 endmodule
-    
+
+33) module that outputs a 32 bit number. Write verilog code to grab bits 8-14 bits.
+
+module Grabbits(in,out);
+
+input [31:0] in;
+
+output reg [7:0] out;
+
+reg [31:0] temp;
+
+integer i;
+
+always @(in)
+
+begin
+
+temp = in >> 8;
+
+for( i = 0; i <= 7; i = i+1)
+begin
+
+out[i] = temp[0] & 1'b1;
+
+temp = temp >> 1;
+
+end
+end
+
+endmodule
+
+module tb;
+
+reg [31:0] in;
+
+wire [7:0] out;
+
+Grabbits dut(in,out);
+
+initial
+
+begin
+in = 32'b00000000000000000101010100000000;
+end
+endmodule
+
 
 
 
