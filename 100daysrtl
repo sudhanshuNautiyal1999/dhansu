@@ -1804,6 +1804,38 @@ module lfsr5(clk,reset,q);
         end
 endmodule
 
+32 A 100-bit binary adder. The adder adds two 100-bit numbers and a carry-in to produce a 100-bit sum and
+   carry out. (https://hdlbits.01xz.net/wiki/Adder100)
+
+ module Fulladder(in1,in2,carryin,sum,carryout);
+    input in1,in2,carryin;
+    output sum,carryout;
+    assign sum = in1^in2^carryin;
+    assign carryout = in2&carryin | (in1)&(in2|carryin);
+endmodule
+
+
+module adder100(a,b,cin,cout,sum);
+    input [99:0] a,b;
+    input cin;
+    output cout;
+    output [99:0] sum;
+    wire [98:0] w;
+    Fulladder f1(a[0],b[0],cin,sum[0],w[0]);
+    genvar i;
+    generate
+        begin
+            for( i = 1; i<=98 ; i=i+1)
+                begin : adder
+                    Fulladder f2(a[i],b[i],w[i-1],sum[i],w[i]);
+                end
+        end
+    endgenerate
+    Fulladder f3(a[99],b[99],w[98],sum[99],cout);
+endmodule
+    
+
+
 
 
 
