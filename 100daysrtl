@@ -1879,6 +1879,113 @@ in = 32'b00000000000000000101010100000000;
 end
 endmodule
 
+34) Finite state machine (FSM) for an automatic reversible 6 modulo counter as follows: 
+    The counter counts 0, 1, 2, 3, 4, 5 (when  input is  0) and reverses: 5 4, 3, 2, 1, 0 
+    (when input is 1)
+
+module count0to5(clk,rst,in,out);
+
+input clk,rst,in;
+output reg [3:0] out;
+parameter A = 4'b0000, B = 4'b0001, C = 4'b0010, D = 4'b0011, E = 4'b0100, F = 4'b0101,  G = 4'b0111, H = 4'b1000,I = 4'b1001, J = 4'b1010, K = 4'b1011, L = 4'b1100;
+reg [3:0] ps, ns;
+
+always @(posedge clk)
+begin
+if(rst)
+ps <= A;
+else
+ps <= ns;
+end
+
+always @(ps,in)
+begin
+case (ps)
+A : begin
+ns = B;
+out = 4'b0000;
+end
+
+B : begin
+ns = C;
+out = 4'b0001;
+end
+
+C : begin
+ns = D;
+out = 4'b0010;
+end
+
+D : begin
+ns = E;
+out = 4'b0011;
+end
+
+E : begin
+ns = F;
+out = 4'b0100;
+end
+
+F : begin
+ns = in ? G : A;
+out = 4'b0101;
+end
+
+G : begin
+ns = H;
+out = 4'b0101;
+end
+
+H : begin
+ns = I;
+out = 4'b0100;
+end
+
+I : begin
+ns = J;
+out = 4'b0011;
+end
+
+J : begin
+ns = K;
+out = 4'b0010;
+end
+
+K : begin
+ns = L;
+out = 4'b0001;
+end
+
+L : begin
+ns = in ? A : G; 
+out = 4'b0000;
+end
+endcase
+end
+endmodule
+
+module tb;
+
+reg clk,rst,in;
+wire[3:0] out;
+
+count0to5 dut(clk,rst,in,out);
+
+initial
+begin
+clk = 1'b0;
+rst = 1'b1;
+in = 1'b1;
+#10;
+rst = 1'b0;
+#60;
+in = 1'b0;
+end
+
+always # 5 clk = ~clk;
+
+endmodule
+			 
 
 
 
