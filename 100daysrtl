@@ -1985,6 +1985,110 @@ end
 always # 5 clk = ~clk;
 
 endmodule
+
+35) Simple and basic UART transmitter which transfer 8 bit data frame
+
+module uarttx(clk,rst,data_in,done,data_out,stop_bit,start_bit);
+
+input clk,rst,data_in;
+output done,data_out,stop_bit,start_bit;
+
+parameter idle = 3'b000, start = 3'b001, transfer = 3'b010, endd = 3'b100;
+reg [2:0] ps,ns;
+reg [3:0] count;
+
+always @(posedge clk)
+begin
+if(rst)
+ps <= idle;
+else
+ps <= ns;
+end
+
+
+always @(ps,data_in,count)
+begin
+case(ps)
+idle : ns = start;
+start : ns = data_in ? start : transfer;
+transfer : ns = (count == 4'b1000) ? (data_in ? endd : start) : transfer;
+endd : ns = data_in ? start : transfer;
+endcase
+end
+
+always @(posedge clk)
+begin
+if(rst)
+count <= 4'b0000;
+else if(ps == transfer)
+count <= count + 1'b1;
+else
+count <= 4'b0000;
+end
+
+assign done = (ps == endd) ? 1'b1 : 1'b0;
+assign data_out = (ps == transfer) ? data_in : 1'bx;
+assign start_bit = (ps == start) ? 1'b1 : 1'b0;
+assign stop_bit = (count == 4'b1000) ? data_in : 1'b0; 
+endmodule
+
+module tb;
+reg clk,rst,data_in;
+wire done,data_out,stop_bit,start_bit;
+uarttx dut(clk,rst,data_in,done,data_out,stop_bit,start_bit);
+
+initial
+begin
+clk = 1'b0;
+rst = 1'b1;
+data_in = 1'b1;
+#6
+rst = 1'b0;
+#19
+data_in = 1'b0;
+#10
+data_in = 1'b1;
+#10;
+data_in = 1'b1;
+#10;
+data_in = 1'b1;
+#10;
+data_in = 1'b1;
+#10;
+data_in = 1'b1;
+#10;
+data_in = 1'b1;
+#10;
+data_in = 1'b1;
+#10;
+data_in = 1'b0;
+#10;
+data_in = 1'b1;
+#40;
+data_in = 1'b0;
+#10
+data_in = 1'b1;
+#10;
+data_in = 1'b0;
+#10;
+data_in = 1'b1;
+#10;
+data_in = 1'b0;
+#10;
+data_in = 1'b1;
+#10;
+data_in = 1'b0;
+#10;
+data_in = 1'b1;
+#10;
+data_in = 1'b0;
+#10;
+data_in = 1'b1;
+
+end
+
+always #5 clk = ~clk;
+endmodule
 			 
 
 
