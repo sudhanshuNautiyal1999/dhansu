@@ -2089,6 +2089,39 @@ end
 
 always #5 clk = ~clk;
 endmodule
+
+36) Solution to HDLbits problem (https://hdlbits.01xz.net/wiki/Exams/review2015_fsmseq)
+
+module top_module(clk ,reset ,data ,start_shifting);
+    input clk,reset,data;
+    output start_shifting;
+    parameter S0 = 4'b0000 ,S1 = 4'b0001 ,S2 = 4'b0010 ,S3 = 4'b0100 ,S4 = 4'b1000;
+    reg [3:0] ps ,ns;
+    
+    always @(posedge clk)
+        begin
+            if(reset)
+                ps <= S0;
+            else
+                ps <= ns;
+        end
+    
+    always @(ps,data)
+        begin
+            case(ps)
+                S0 : ns = data ? S1 : S0;
+                S1 : ns = data ? S2 : S0;
+                S2 : ns = data ? S2 : S3;
+                S3 : ns = data ? S4 : S0;
+                S4 : ns = S4;
+            endcase
+        end
+    
+    assign start_shifting = (ps == S4) ? 1'b1 : 1'b0;
+    
+endmodule
+    
+
 			 
 
 
