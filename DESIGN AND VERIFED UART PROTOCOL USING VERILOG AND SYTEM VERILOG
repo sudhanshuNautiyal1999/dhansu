@@ -1,0 +1,373 @@
+module UartTx(clk,rst,data_in,start_bit,stop_bit,doneTx,data_out);
+input clk,rst;
+input [9:0] data_in;
+output start_bit,stop_bit,doneTx;
+output reg data_out;
+
+parameter idletx = 4'b0001, starttx = 4'b0010, Transfertx = 4'b0100, Endtx = 4'b1000;
+reg [3:0] ps, ns;
+integer i;
+
+always @(posedge clk)
+begin
+if(rst)
+ps <= idletx;
+else
+ps <= ns;
+end
+
+always @(ps, data_in, i)
+begin
+case(ps)
+idletx     : ns = starttx;
+starttx    : ns = data_in[0] ? starttx : Transfertx;
+Transfertx : ns = (i == 10)  ? Endtx   : Transfertx; //(data_in[9] ? Endtx : starttx)
+Endtx      : ns = starttx;
+endcase
+end
+
+always @(posedge clk)
+begin
+if(ps == starttx && i == 1'b0)
+begin
+data_out <= data_in[0];
+i <= 1'b1;
+end
+else if(ps == Transfertx || (ps == starttx && i == 1'b1))
+begin
+if (i < 9)
+begin
+data_out <= data_in[i];
+i <= i + 1'b1;
+end
+else if(i == 9)
+begin
+data_out <= data_in[i];
+i <= i + 1'b1;
+end
+end
+else
+i <= 1'b0;
+end
+
+assign doneTx    = (ps == Endtx) ? 1'b1 : 1'b0;
+assign start_bit = (ps == starttx) ? data_in[0] : 1'b1;
+assign stop_bit  = (ps == Transfertx && i==10) ? data_in[9] : 1'b0;
+
+endmodule
+
+
+module UartRx(clk,rst,data_in,data_out,doneRx);
+input clk,rst,data_in;
+output doneRx;
+output reg [7:0] data_out;
+parameter idlerx = 4'b0001, startrx = 4'b0010, Recivedrx = 4'b0100, Endrx = 4'b1000;
+reg [3:0] ps, ns;
+integer i;
+
+
+always @(posedge clk)
+begin
+if(rst)
+ps <= idlerx;
+else
+ps <= ns;
+end
+
+always @(ps, data_in, i)
+begin
+casex(ps)
+idlerx    : ns = startrx;
+startrx   : ns = data_in  ? startrx : Recivedrx;
+Recivedrx : ns = (i == 8) ? Endrx   : Recivedrx;
+Endrx     : ns = startrx;
+endcase
+end
+
+always @(posedge clk)
+begin
+if(rst)
+begin
+i <= 1'b0;
+data_out <= 8'b00000000;
+end
+if(ps == Recivedrx)
+begin
+if (i < 8)
+begin
+data_out[i] <= data_in;
+i <= i + 1'b1;
+end
+else if(i == 8)
+begin
+data_out <= data_in ? data_out : 8'b00000000;
+//i <= i + 1'b1;
+end
+end
+else
+i <= 1'b0;
+end
+
+assign doneRx = (ps == Endrx) ? 1'b1 : 1'b0;
+
+endmodule
+
+module UARTPROTOCOL(clk,rst,in,out,done);
+input clk,rst;
+input [9:0] in;
+output done;
+output [7:0] out;
+wire startbit,stopbit,done_tx,dataout;
+
+UartTx utx(clk,rst,in,startbit,stopbit,done_tx,dataout);
+UartRx urx(clk,rst,dataout,out,done);
+
+endmodule
+
+
+module tb;
+reg clk,rst;
+reg [9:0] in;
+wire done;
+wire [7:0] out;
+
+UARTPROTOCOL dut(clk,rst,in,out,done);
+
+initial
+begin
+clk = 1'b0;
+rst = 1'b1;
+#6;
+rst = 1'b0;
+in = 10'b1010101010;
+#119
+in = 10'b1000011110;
+#130
+in = 10'b1001110000;
+#120
+in = 10'b1001000100;
+#120
+in = 10'b1001000101;
+#120
+in = 10'b1111111110;
+#120
+in = 10'b1001000101;
+#120
+in = 10'b1001110000;
+
+
+end
+
+always #5 clk = ~clk;
+
+endmodule
+
+
+
+VERIFICATION USING SYSTEM VERILOG
+class transaction;
+  rand bit [9:0]in;
+  bit done;
+  bit [7:0] out;
+  
+  function transaction copy();
+    copy = new();
+    copy.in = this.in;
+    copy.done = copy.done;
+    copy.out = copy.out;
+  endfunction
+  
+  function void display(input string tag);
+    $display("[%0s] -> INPUT = %0b : OUTPUT = %0b : DONE = %0b",tag,in,out,done);
+  endfunction
+  
+  constraint data_in {in[9] == 1'b1;in[0] == 1'b0;}
+
+endclass
+
+class generator;
+  transaction tr;
+  mailbox #(transaction) mbxgendrv;
+  mailbox #(transaction) mbxgensco;
+  event sconext;
+  event done;
+  int count;
+  
+  function new(mailbox #(transaction) mbxgendrv,mailbox #(transaction) mbxgensco);
+    this.mbxgendrv = mbxgendrv;
+    this.mbxgensco = mbxgensco;
+    tr = new();
+  endfunction
+  
+  task run();
+    repeat(count)
+      begin
+        tr.randomize();
+        mbxgendrv.put(tr.copy);
+        mbxgensco.put(tr.copy);
+        tr.display("GEN");
+        @(sconext);
+      end
+    -> done;
+  endtask
+endclass
+
+interface Uart_protocolif;
+  logic clk,rst;
+  logic [9:0]in;
+  logic done;
+  logic [7:0] out;
+endinterface
+
+class driver;
+  transaction tr;
+  mailbox #(transaction) mbxgendrv;
+  virtual Uart_protocolif uartif;
+  
+  function new(mailbox #(transaction) mbxgendrv);
+    this.mbxgendrv = mbxgendrv;
+  endfunction
+  
+  task reset();
+    uartif.rst <= 1'b1;
+    repeat(5) @(posedge uartif.clk);
+    uartif.rst <= 1'b0;
+    @(posedge uartif.clk);
+    $display("[DRV] : RESET DONE");
+  endtask
+  
+  task run();
+    forever
+      begin
+        mbxgendrv.get(tr);
+        uartif.in <= tr.in;
+        @(posedge uartif.clk);
+        tr.display("DRV");
+      end
+  endtask
+endclass
+
+class monitor;
+  transaction tr;
+  mailbox #(transaction) mbxmonsco;
+  virtual Uart_protocolif uartif;
+  
+  function new(mailbox #(transaction) mbxmonsco);
+    this.mbxmonsco = mbxmonsco;
+  endfunction
+  
+  task run();
+    tr = new();
+    forever
+      begin
+        @(posedge uartif.done);
+        tr.out = uartif.out;
+        tr.done = uartif.done;
+        mbxmonsco.put(tr);
+        tr.display("MON");
+      end
+  endtask
+endclass
+
+class scoreboard;
+  transaction tr;
+  transaction gensco;
+  mailbox #(transaction) mbxmonsco;
+  mailbox #(transaction) mbxgensco;
+  event sconext;
+  
+  function new(mailbox #(transaction) mbxmonsco,  mailbox #(transaction) mbxgensco);
+    this.mbxmonsco = mbxmonsco;
+    this.mbxgensco = mbxgensco;
+  endfunction
+  
+  task run();
+    forever
+      begin
+        mbxmonsco.get(tr);
+        mbxgensco.get(gensco);
+        tr.display("SCO");
+        gensco.display("Gen");
+        if(gensco.in[8:1] == tr.out)
+          $display("UART OPERATION IS SUCCESSFUL");
+        else
+          $display("ERROR IN UART OPERATION");
+        -> sconext;
+      end
+  endtask
+endclass
+
+class environment;
+  generator gen;
+  driver drv;
+  monitor mon;
+  scoreboard sco;
+  event next;
+  mailbox #(transaction) gendrvmbx;
+  mailbox #(transaction) monscombx;
+  mailbox #(transaction) genscombx;
+  virtual Uart_protocolif uartif;
+  
+  function new(virtual Uart_protocolif uartif);
+    gendrvmbx = new();
+    monscombx = new();
+    genscombx = new();
+    gen = new(gendrvmbx, genscombx);
+    drv = new(gendrvmbx);
+    mon = new(monscombx);
+    sco = new(monscombx, genscombx);
+    this.uartif = uartif;
+    drv.uartif = this.uartif;
+    mon.uartif = this.uartif;
+    gen.sconext = next;
+    sco.sconext = next;
+  endfunction
+  
+  task pre_test();
+    drv.reset();
+  endtask
+  
+  task test();
+    fork
+      gen.run();
+      drv.run();
+      mon.run();
+      sco.run();
+    join_any
+  endtask
+  
+  task post_test;
+    wait(gen.done.triggered);
+    $finish();
+  endtask
+  
+  task run();
+    pre_test();
+    test();
+    post_test();
+  endtask
+  
+endclass
+
+module tb;
+  Uart_protocolif uartif();
+  environment env;
+  
+  UARTPROTOCOL dut(uartif.clk,uartif.rst,uartif.in,uartif.out,uartif.done);
+  
+  initial
+    begin
+      uartif.clk <= 1'b0;
+    end
+  
+  always #5 uartif.clk <= ~uartif.clk;
+  
+  initial
+    begin
+      env = new(uartif);
+      env.gen.count = 10;
+      env.run();
+    end
+
+  
+endmodule
