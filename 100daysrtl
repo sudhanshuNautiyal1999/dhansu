@@ -2120,6 +2120,36 @@ module top_module(clk ,reset ,data ,start_shifting);
     assign start_shifting = (ps == S4) ? 1'b1 : 1'b0;
     
 endmodule
+
+37) Solution to HDLBITS Exams/2013 q2afsm (https://hdlbits.01xz.net/wiki/Exams/2013_q2afsm)
+
+module top_module (clk ,resetn ,r ,g);
+    input clk,resetn;
+    input [3:1] r;
+    output [3:1] g;
+    
+    parameter A = 3'b000 ,B = 3'b001 ,C = 3'b010 ,D = 3'b100;
+    reg [2:0] ps,ns;
+    
+    always@(posedge clk)
+        if(~resetn)
+            ps <= A;
+     else
+            ps <= ns;
+    
+    always@(ps ,r)
+        case(ps)
+            A : ns = r[1] ? B : (r[2] ? C : (r[3] ? D : A));
+            B : ns = r[1] ? B :A;
+            C : ns = r[2] ? C :A;
+            D : ns = r[3] ? D :A;
+        endcase
+    
+    assign g[1] = (ps == B) ? 1'b1 : 1'b0;
+    assign g[2] = (ps == C) ? 1'b1 : 1'b0;
+    assign g[3] = (ps == D) ? 1'b1 : 1'b0;
+    
+endmodule
     
 
 			 
