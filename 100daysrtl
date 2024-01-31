@@ -2150,6 +2150,37 @@ module top_module (clk ,resetn ,r ,g);
     assign g[3] = (ps == D) ? 1'b1 : 1'b0;
     
 endmodule
+
+38) HDLbits solution of Lemmings1(https://hdlbits.01xz.net/wiki/Lemmings1)
+
+module top_module(clk ,areset ,bump_left ,bump_right ,walk_left ,walk_right);
+    
+    input clk ,areset ,bump_left ,bump_right;
+    output walk_left ,walk_right;
+    
+    parameter Left = 2'b00 , Right = 2'b01;
+    reg [1:0] ps ,ns;
+    
+    always @(posedge clk or posedge areset)
+        begin
+            if(areset)
+                ps <= Left;
+            else
+                ps <= ns;
+        end
+    
+    always @(ps ,bump_left ,bump_right)
+        begin
+            case(ps)
+                Left  : ns = bump_left  ? Right : Left;
+                Right : ns = bump_right ? Left  : Right;
+            endcase
+        end
+    
+    assign walk_left  = (ps == Left)  ? 1'b1 : 1'b0;
+    assign walk_right = (ps == Right) ? 1'b1 : 1'b0;
+    
+endmodule
     
 
 			 
