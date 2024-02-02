@@ -2181,6 +2181,42 @@ module top_module(clk ,areset ,bump_left ,bump_right ,walk_left ,walk_right);
     assign walk_right = (ps == Right) ? 1'b1 : 1'b0;
     
 endmodule
+
+39) HDLbits solution of Lemmings2(https://hdlbits.01xz.net/wiki/Lemmings2)
+
+module top_module(clk ,areset ,bump_left ,bump_right ,ground ,walk_left ,walk_right ,aaah);
+    
+    input clk ,areset ,bump_left ,bump_right ,ground;
+    output walk_left ,walk_right ,aaah;
+    
+    parameter LEFT  = 3'b000 ,RIGHT = 3'b001 ,FALL_L = 3'b010 ,FALL_R = 3'b100;
+    reg [2:0] ps ,ns;
+    
+    always @(posedge clk or posedge areset)
+        begin
+            if(areset)
+                ps <= LEFT;
+            else
+                ps <= ns;
+        end
+    
+    always @(ps ,bump_left ,bump_right ,ground)
+        begin
+            case(ps)
+                LEFT   : ns = ~ground ? FALL_L : (bump_left  ? RIGHT :  LEFT);
+                RIGHT  : ns = ~ground ? FALL_R : (bump_right ? LEFT  : RIGHT);
+                FALL_L : ns = ~ground ? FALL_L :  LEFT;
+                FALL_R : ns = ~ground ? FALL_R : RIGHT;
+            endcase
+        end
+    
+    assign walk_left  = (ps ==  LEFT) ? 1'b1 : 1'b0;
+    assign walk_right = (ps == RIGHT) ? 1'b1 : 1'b0;
+    assign aaah = (ps == FALL_L || ps == FALL_R) ? 1'b1 : 1'b0;
+    
+endmodule
+    
+
     
 
 			 
