@@ -2151,6 +2151,8 @@ module top_module (clk ,resetn ,r ,g);
     
 endmodule
 
+//  Lemmings series 
+
 38) HDLbits solution of Lemmings1(https://hdlbits.01xz.net/wiki/Lemmings1)
 
 module top_module(clk ,areset ,bump_left ,bump_right ,walk_left ,walk_right);
@@ -2215,6 +2217,45 @@ module top_module(clk ,areset ,bump_left ,bump_right ,ground ,walk_left ,walk_ri
     assign aaah = (ps == FALL_L || ps == FALL_R) ? 1'b1 : 1'b0;
     
 endmodule
+
+40)HDLbits solution of Lemmings3(https://hdlbits.01xz.net/wiki/Lemmings3)
+
+module top_module(clk ,areset ,bump_left ,bump_right ,ground , dig, walk_left ,walk_right ,aaah ,digging);
+    
+    input clk ,areset ,bump_left ,bump_right ,ground , dig;
+    output walk_left ,walk_right ,aaah ,digging;
+    
+    parameter WalkL = 4'b0000 ,WalkR = 4'b1000 ,FallL = 4'b0100 ,FallR = 4'b0010 ,DigL = 4'b0001 ,DigR = 4'b1111;
+    reg [3:0] ps ,ns;
+    
+    always @(posedge clk or posedge areset)
+        begin
+            if(areset)
+                ps <= WalkL;
+            else
+                ps <= ns;
+        end
+    
+    always @(ps ,bump_left ,bump_right ,ground , dig)
+        begin
+            case(ps)
+                WalkL : ns = !ground ? FallL : (dig ? DigL : (bump_left  ? WalkR : WalkL));
+                WalkR : ns = !ground ? FallR : (dig ? DigR : (bump_right ? WalkL : WalkR));
+                FallL : ns = !ground ? FallL : WalkL;
+                FallR : ns = !ground ? FallR : WalkR;
+                DigL  : ns = !ground ? FallL : DigL;
+                DigR  : ns = !ground ? FallR : DigR;
+            endcase
+        end
+    
+    assign walk_left  = (ps == WalkL) ? 1'b1 : 1'b0;
+    assign walk_right = (ps == WalkR) ? 1'b1 : 1'b0;
+    assign aaah    = (ps == FallL || ps == FallR) ? 1'b1 : 1'b0;
+    assign digging = (ps == DigL  || ps == DigR)  ? 1'b1 : 1'b0;
+    
+endmodule
+    
+
     
 
     
