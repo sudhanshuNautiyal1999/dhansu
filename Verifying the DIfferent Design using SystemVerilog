@@ -1,0 +1,256 @@
+1) FULL_ADDER -> Design using Verilog and Verified using System Verilog
+
+RTL.v
+
+module adder(clk,rst,a,b,sum);
+  
+  input clk ,rst;
+  input [3:0] a ,b;
+  output reg [4:0] sum;
+  
+  always @(posedge clk)
+    begin
+      if(rst)
+        sum <= 5'b00000;
+      else
+        sum <= a + b;
+    end
+
+endmodule
+
+TB.sv
+
+class transaction;
+  
+  rand bit [3:0] a;
+  rand bit [3:0] b;
+  bit [4:0] sum;
+  
+  function void display(string proccess);
+    $display("[%0s] A : %0d , B : %0d , SUM : %0d",proccess,a,b,sum);
+  endfunction
+  
+  function transaction copy();
+    copy = new();
+    copy.a = this.a;
+    copy.b = this.b;
+    copy.sum = this.sum;
+  endfunction
+
+endclass
+
+class generator;
+  
+  transaction transgen;
+  mailbox #(transaction) gen2drv;
+  mailbox #(transaction) gen2sco;
+
+  int count;
+  event pass;
+  event done;
+
+  function new(mailbox #(transaction) gen2drv,mailbox #(transaction) gen2sco);
+    this.gen2drv = gen2drv;
+    this.gen2sco = gen2sco;
+    transgen = new();
+  endfunction
+  
+  task run();
+    repeat(count)
+      begin
+        transgen.randomize();
+        transgen.display("GEN");
+        gen2drv.put(transgen.copy);
+        gen2sco.put(transgen.copy);
+        @(pass);
+      end
+    -> done;
+  endtask
+
+endclass
+
+interface adder_interface;
+  logic clk ,rst;
+  logic [3:0] a ,b;
+  logic [4:0] sum;
+endinterface
+
+class driver;
+  
+  transaction transdrv;
+  mailbox #(transaction) gen2drv;
+  virtual adder_interface aif;
+  
+  function new(mailbox #(transaction) gen2drv);
+    this.gen2drv = gen2drv;
+  endfunction
+  
+  task reset();
+    aif.rst <= 1'b1;
+    repeat(2) @(posedge aif.clk);
+    aif.rst <= 1'b0;
+    repeat(1) @(posedge aif.clk);
+    $display("-----RESET_OPERATION_DONE-----");
+  endtask
+  
+  task run();
+    forever
+      begin
+        gen2drv.get(transdrv);
+        transdrv.display("DRV");
+        aif.a <= transdrv.a;
+        aif.b <= transdrv.b;
+        aif.sum <= transdrv.sum;
+      end
+  endtask
+
+endclass
+
+class monitor;
+  
+  transaction transmon;
+  mailbox #(transaction) mon2sco;
+  virtual adder_interface aif;
+  
+  function new(mailbox #(transaction) mon2sco);
+    this.mon2sco = mon2sco;
+  endfunction
+  
+  task run();
+    transmon = new();
+    forever
+      begin
+        repeat(2) @(posedge aif.clk);
+        transmon.a   = aif.a;
+        transmon.b   = aif.b;
+        transmon.sum = aif.sum;
+        mon2sco.put(transmon);
+        transmon.display("MON");
+      end
+  endtask
+  
+endclass
+
+class scoreboard;
+  
+  transaction transgen;
+  transaction transsco;
+  mailbox #(transaction) gen2sco;
+  mailbox #(transaction) mon2sco;
+  
+  event pass;
+  
+  function new(mailbox #(transaction) gen2sco, mailbox #(transaction) mon2sco);
+    this.gen2sco = gen2sco;
+    this.mon2sco = mon2sco;
+  endfunction
+  
+  task run();
+    
+    forever
+      begin
+        mon2sco.get(transsco);
+        gen2sco.get(transgen);
+        transgen.display("GENINMON");
+        transsco.display("MON");
+        if((transgen.a + transgen.b) == transsco.sum)
+          $display("CORRECT OUTPUT");
+        else
+          $display("INCORRECT OUTPUT");
+        -> pass;
+      end
+    
+  endtask
+  
+endclass
+
+class environment;
+  
+  generator gen;
+  driver drv;
+  monitor mon;
+  scoreboard sco;
+  event pass;
+  
+  mailbox #(transaction) gendrv;
+  mailbox #(transaction) gensco;
+  mailbox #(transaction) monsco;
+  
+  virtual adder_interface aif;
+  
+  function new(virtual adder_interface aif);
+    
+    gendrv = new();
+    gensco = new();
+    monsco = new();
+    gen = new(gendrv ,gensco);
+    drv = new(gendrv);
+    mon = new(monsco);
+    sco = new(gensco ,monsco);
+    this.aif = aif;
+    drv.aif = this.aif;
+    mon.aif = this.aif;
+    gen.pass = pass;
+    sco.pass = pass;
+    
+  endfunction
+  
+  task pre_test();
+    drv.reset();
+  endtask
+  
+  task test();
+    
+    fork
+      gen.run();
+      drv.run();
+      sco.run();
+      mon.run();
+    join_any
+    
+  endtask
+  
+  task post_test();
+    wait(gen.done.triggered);
+    $finish();
+  endtask
+  
+  task run();
+    pre_test;
+    test;
+    post_test;
+  endtask
+  
+endclass
+
+
+module tb;
+  
+  environment env;
+  adder_interface aif();
+  adder dut(aif.clk ,aif.rst ,aif.a ,aif.b ,aif.sum);
+  
+  initial
+    begin
+      aif.clk <= 1'b0;
+    end
+  
+  always #5 aif.clk <= ~aif.clk;
+  
+  initial
+    begin
+      env = new(aif);
+      env.gen.count = 10;
+      env.run();
+    end
+  
+  initial
+    begin
+      $dumpfile("dump.vcd");
+      $dumpvars;
+      #1000 
+      $finish();
+    end
+  
+endmodule
+  
