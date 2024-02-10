@@ -2218,7 +2218,7 @@ module top_module(clk ,areset ,bump_left ,bump_right ,ground ,walk_left ,walk_ri
     
 endmodule
 
-40)HDLbits solution of Lemmings3(https://hdlbits.01xz.net/wiki/Lemmings3)
+40) HDLbits solution of Lemmings3(https://hdlbits.01xz.net/wiki/Lemmings3)
 
 module top_module(clk ,areset ,bump_left ,bump_right ,ground , dig, walk_left ,walk_right ,aaah ,digging);
     
@@ -2254,6 +2254,102 @@ module top_module(clk ,areset ,bump_left ,bump_right ,ground , dig, walk_left ,w
     assign digging = (ps == DigL  || ps == DigR)  ? 1'b1 : 1'b0;
     
 endmodule
+
+41) HDLbits solution of Exams/2014 q3fsm(https://hdlbits.01xz.net/wiki/Exams/2014_q3fsm)
+
+module top_module(clk ,reset ,s ,w ,z);
+    
+    input clk ,reset ,s ,w;
+    output reg z;
+    
+    parameter A = 1'b1 ,B = 1'b0;
+    reg ps ,ns;
+    reg [1:0] countclk ,countone;
+    
+    always @(posedge clk)
+        begin
+            if(reset)
+                ps <= A;
+            else
+                ps <= ns;
+        end
+    
+    always @(ps ,s)
+        case(ps)
+            A : ns = s ? B : A;
+            B : ns = B;
+        endcase
+    
+    always @(posedge clk)
+        begin
+            if(reset)
+                begin
+                    countclk <= 2'b00;
+                    countone <= 2'b00;
+                    z        <= 1'b0;
+                end
+            else
+                begin
+                    if(ps == B)
+                        begin
+                            countclk <= countclk + 1'b1;
+                            if(countclk == 2'b10)
+                                begin
+                                    countclk <= 1'b0;
+                                    if(w == 1)
+                                        begin
+                                            countone <= countone + 1'b1;
+                                            if(countone == 2'b10 && w != 1'b1)
+                                                begin
+                                                    z <= 1'b1;
+                                                    countone <= 1'b0;
+                                                end
+                                            else
+                                                begin
+                                                    if(countone == 1'b1 && w == 1'b1)
+                                                        begin
+                                                            z <= 1'b1;
+                                                            countone <= 1'b0;
+                                                        end
+                                                    else
+                                                        begin
+                                                            z <= 1'b0;
+                                                            countone <= 1'b0;
+                                                        end
+                                                end
+                                        end
+                                    else
+                                        begin
+                                            if(countone == 2'b10)
+                                                begin
+                                                    z <= 1;
+                                                    countone <= 1'b0;
+                                                end
+                                            else
+                                                begin
+                                                    z <= 1'b0;
+                                                    countone <= 1'b0;
+                                                end
+                                        end
+                                end
+                            else
+                                begin
+                                    z <= 1'b0;
+                                    if(w == 1'b1)
+                                        countone <= countone + 1'b1;
+                                    else
+                                        countone <= countone;
+                                end
+                        end
+                    else
+                        z <= 1'b0;
+                    
+                end
+        end
+    
+endmodule
+    
+
     
 
     
