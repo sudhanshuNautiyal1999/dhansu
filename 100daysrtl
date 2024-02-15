@@ -2348,6 +2348,102 @@ module top_module(clk ,reset ,s ,w ,z);
         end
     
 endmodule
+
+42) 4bit wallace multiplier 
+
+module HalfAdder(a ,b ,sum ,carry);
+
+input a ,b;
+output sum ,carry;
+
+xor(sum ,a ,b);
+and(carry ,a ,b);
+
+endmodule
+
+module FullAdder(a ,b ,c ,sum ,carry);
+
+input a ,b ,c;
+output sum ,carry;
+
+wire [2:0] nets;
+
+xor(sum ,a ,b ,c);
+and(nets[0] ,a ,b);
+and(nets[1] ,a ,c);
+and(nets[2] ,b ,c);
+or(carry ,nets[0] ,nets[1] ,nets[2]);
+
+endmodule
+
+module Wallacemultiplier(A ,B ,Out);
+
+input [3:0] A ,B;
+output [7:0] Out;
+
+wire [15:1] nets;
+wire [5:0] sum;
+wire [10:0] carry;
+
+and(Out[0] ,A[0] ,B[0]);
+and(nets[1] ,A[0] ,B[1]);
+and(nets[2] ,A[1] ,B[0]);
+and(nets[3] ,A[2] ,B[0]);
+and(nets[4] ,A[0] ,B[2]);
+and(nets[5] ,A[1] ,B[1]);
+and(nets[6] ,A[2] ,B[1]);
+and(nets[7] ,A[3] ,B[0]);
+and(nets[8] ,A[0] ,B[3]);
+and(nets[9] ,A[1] ,B[2]);
+and(nets[10] ,A[3] ,B[1]);
+and(nets[11] ,A[1] ,B[3]);
+and(nets[12] ,A[2] ,B[2]);
+and(nets[13] ,A[2] ,B[3]);
+and(nets[14] ,A[3] ,B[2]);
+and(nets[15] ,A[3] ,B[3]);
+
+HalfAdder HA1(nets[8] ,nets[9] ,sum[0] ,carry[0]);
+HalfAdder HA2(nets[11] ,nets[12] ,sum[1] ,carry[1]);
+
+FullAdder FA1(nets[4] ,nets[5] ,1'b0 ,sum[2] ,carry[2]);
+FullAdder FA2(nets[6] ,nets[7] ,sum[0] ,sum[3] ,carry[3]);
+FullAdder FA3(nets[10] ,carry[0] ,sum[1] ,sum[4] ,carry[4]);
+FullAdder FA4(nets[13] ,nets[14] ,carry[1] ,sum[5] ,carry[5]);
+
+HalfAdder HA3(nets[1] ,nets[2] ,Out[1] ,carry[6]);
+FullAdder FA5(nets[3] ,carry[6] ,sum[2] ,Out[2] ,carry[7]);
+FullAdder FA6(carry[2] ,carry[7] ,sum[3] ,Out[3] ,carry[8]);
+FullAdder FA7(carry[3] ,carry[8] ,sum[4] ,Out[4] ,carry[9]);
+FullAdder FA8(carry[4] ,carry[9] ,sum[5] ,Out[5] ,carry[10]);
+FullAdder FA9(carry[5] ,carry[10] ,nets[15] ,Out[6] ,Out[7]);
+
+endmodule
+
+
+module tb;
+
+reg [3:0] A ,B;
+wire [7:0] Out;
+
+Wallacemultiplier dut(A ,B ,Out);
+
+initial
+begin
+A = 4'b0011;
+B = 4'b1100;
+#10;
+A = 4'b1010;
+B = 4'b1110;
+#10;
+A = 4'b1111;
+B = 4'b1111;
+#10;
+A = 4'b0000;
+B = 4'b0000;
+end
+
+endmodule
+
     
 
     
