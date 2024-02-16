@@ -253,4 +253,55 @@ module tb;
     end
   
 endmodule
+
+2) Verify the 4 bit up counter using assertion 
+
+rtl.v
+
+module counter(clk ,rst ,out);
+  
+  input clk ,rst;
+  output reg [3:0] out;
+  
+  always @(posedge clk)
+    begin
+      if(rst)
+        out <= 4'b0000;
+      else
+        out <= out + 1'b1;
+    end
+  
+endmodule
+  
+TB.sv
+
+module tb;
+  
+  reg clk ,rst;
+  wire [3:0] out;
+  
+  counter DUT(clk ,rst ,out);
+  
+  initial
+    begin
+      clk = 1'b0;
+      rst = 1'b1;
+      #6
+      rst = 1'b0;
+    end
+  
+  always #5 clk = ~clk;
+  
+  Countercheck : assert property(@(posedge clk) !rst |=> ($past(out) + 1 == out)) $info("CORRECT OUTPUT AT THIS CLOCK EDGE",$time); else $error("WRONG OUTPUT AT THIS CLOCK EDGE",$time);
+  
+  initial 
+    begin
+      $assertvacuousoff(0);
+      $dumpfile("dump.vcd");
+      $dumpvars;
+      #200; 
+      $finish;
+    end
+  
+endmodule
   
