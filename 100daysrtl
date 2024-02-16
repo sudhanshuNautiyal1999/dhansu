@@ -2444,6 +2444,131 @@ end
 
 endmodule
 
+43) Design an FSM- finite state machine to check whether the two inputs A and B have the same value for the
+previous three samples. Use Mealy machine for the design.
+
+module checksequence(clk ,rst ,inputsequence1 ,inputsequence2 ,out);
+
+input clk ,rst ,inputsequence1 ,inputsequence2;
+output  out;
+
+parameter A = 3'b000 ,B = 3'b001 ,C = 3'b100;
+reg [2:0] ps ,ns;
+
+always @(posedge clk)
+begin
+if(rst)
+ps <= A;
+else
+ps <= ns;
+end
+
+
+always @(ps ,inputsequence1 ,inputsequence2)
+begin
+case(ps)
+A : ns  = (inputsequence1 == inputsequence2) ? B : A;
+B : ns  = (inputsequence1 == inputsequence2) ? C : A;
+C : ns  = (inputsequence1 == inputsequence2) ? C : A;
+endcase
+end
+
+assign out = ((inputsequence1 == inputsequence2) && (ps == C)) ? 1'b1 : 1'b0;
+
+endmodule
+
+module tb;
+
+reg clk ,rst ,inputsequence1 ,inputsequence2;
+wire out;
+
+checksequence dut(clk ,rst ,inputsequence1 ,inputsequence2 ,out);
+
+always #5 clk = ~clk;
+
+initial
+begin
+clk = 1'b0;
+rst = 1'b1;
+#6;
+rst = 1'b0;
+#9;
+inputsequence1 = 1'b0;
+inputsequence2 = 1'b0;
+#10;
+inputsequence1 = 1'b0;
+inputsequence2 = 1'b0;
+#10;
+inputsequence1 = 1'b0;
+inputsequence2 = 1'b0;
+#10;
+inputsequence1 = 1'b1;
+inputsequence2 = 1'b1;
+#10;
+inputsequence1 = 1'b0;
+inputsequence2 = 1'b0;
+#10;
+inputsequence1 = 1'b1;
+inputsequence2 = 1'b1;
+#10;
+inputsequence1 = 1'b0;
+inputsequence2 = 1'b0;
+#10;
+inputsequence1 = 1'b0;
+inputsequence2 = 1'b0;
+#10;
+inputsequence1 = 1'b1;
+inputsequence2 = 1'b0;
+#10;
+inputsequence1 = 1'b0;
+inputsequence2 = 1'b1;
+#10;
+inputsequence1 = 1'b1;
+inputsequence2 = 1'b0;
+#40
+inputsequence1 = 1'b0;
+inputsequence2 = 1'b0;
+#10;
+inputsequence1 = 1'b0;
+inputsequence2 = 1'b0;
+#10;
+inputsequence1 = 1'b0;
+inputsequence2 = 1'b0;
+#10;
+inputsequence1 = 1'b1;
+inputsequence2 = 1'b0;
+#10;
+inputsequence1 = 1'b0;
+inputsequence2 = 1'b1;
+#10;
+inputsequence1 = 1'b0;
+inputsequence2 = 1'b1;
+#10;
+inputsequence1 = 1'b1;
+inputsequence2 = 1'b0;
+#10;
+inputsequence1 = 1'b1;
+inputsequence2 = 1'b1;
+#10;
+inputsequence1 = 1'b1;
+inputsequence2 = 1'b1;
+#10;
+inputsequence1 = 1'b0;
+inputsequence2 = 1'b1;
+#10;
+inputsequence1 = 1'b0;
+inputsequence2 = 1'b0;
+#10;
+inputsequence1 = 1'b0;
+inputsequence2 = 1'b0;
+#10;
+inputsequence1 = 1'b1;
+inputsequence2 = 1'b1;
+
+end
+
+endmodule
+
     
 
     
