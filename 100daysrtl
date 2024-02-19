@@ -2569,7 +2569,166 @@ end
 
 endmodule
 
-    
+44) Design a finite state machine for a serial binary input which is divisible by 5
+
+module fsm5(clk ,rst ,in ,out);
+
+input clk ,rst ,in;
+output out;
+
+parameter A = 5'b00001 ,R1 = 5'b00010 ,R2 = 5'b00100 ,R3 = 5'b01000 ,R4 = 5'b10000 ,R0 = 5'b00000;
+reg [4:0] ps ,ns;
+
+always @(posedge clk)
+begin
+if(rst)
+ps <= A;
+else
+ps <= ns;
+end
+
+always @(ps ,in)
+begin
+case(ps)
+A  : ns = in ? R1 : A;
+R1 : ns = in ? R3 : R2;
+R2 : ns = in ? R0 : R4;
+R3 : ns = in ? R2 : R1;
+R4 : ns = in ? R4 : R3;
+R0 : ns = in ? R1 : R0;
+endcase
+end
+
+assign out = (ps == R0) ? 1'b1 : 1'b0;
+
+endmodule
+
+module tb;
+
+reg clk ,rst ,in;
+wire out;
+
+fsm5 dut(clk ,rst ,in ,out);
+
+initial
+begin
+clk = 1'b0;
+rst = 1'b1;
+in = 1'b1;
+#6
+rst = 1'b0;
+#9
+in = 1'b1;
+#10
+in = 1'b1;
+#10
+in = 1'b0;
+#10
+in = 1'b0;
+#10
+in = 1'b0;
+#10
+in = 1'b0;
+#10
+in = 1'b1;
+#10
+in = 1'b0;
+#10
+in = 1'b0;
+#10
+in = 1'b1;
+#10
+in = 1'b1;
+#40
+in = 1'b1;
+#10
+in = 1'b0;
+#10
+in = 1'b1;
+#10
+in = 1'b1;
+#10
+in = 1'b0;
+#10
+in = 1'b1;
+#10
+in = 1'b0;
+
+#40
+in = 1'b1;
+#10
+in = 1'b0;
+#10
+in = 1'b0;
+#10
+in = 1'b0;
+#10
+in = 1'b1;
+#10
+in = 1'b0;
+#10
+in = 1'b0;
+#10
+in = 1'b1;
+#10
+in = 1'b0;
+#10
+in = 1'b0;
+#10
+in = 1'b1;
+#10
+in = 1'b1;
+
+#40
+in = 1'b1;
+#10
+in = 1'b1;
+#10
+in = 1'b0;
+#10
+in = 1'b1;
+#10
+in = 1'b1;
+#10
+in = 1'b1;
+#10
+in = 1'b0;
+#10
+in = 1'b1;
+#10
+in = 1'b1;
+#10
+in = 1'b1;
+#10
+in = 1'b1;
+#40
+in = 1'b1;
+#10;
+in = 1'b1;
+#10;
+in = 1'b1;
+#10;
+in = 1'b0;
+#10;
+in = 1'b0;
+#10;
+in = 1'b0;
+#10;
+in = 1'b0;
+#10;
+in = 1'b0;
+#10;
+in = 1'b0;
+#10;
+in = 1'b0;
+#10;
+in = 1'b1;
+end
+
+always #5 clk = ~clk;
+
+endmodule
+
 
     
 
