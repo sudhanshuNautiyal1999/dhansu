@@ -747,7 +747,7 @@ module jkf(j,k,clk,out,outbar,rst);
 input j,k,clk,rst;
 output reg out,outbar;
 wire w1,w2,w3,w4;
-always @(posedge clk)
+always @(negedge clk)
 begin
 if(rst==1'b1)
 begin
