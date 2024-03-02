@@ -2729,6 +2729,88 @@ always #5 clk = ~clk;
 
 endmodule
 
+45) Design a finite state machine for a serial binary input which is divisible by 4
+
+module fsm4(clk ,rst ,in ,out);
+
+input clk ,rst ,in;
+output out;
+
+parameter idle = 4'b0000 ,remone = 4'b0001 ,remtwo = 4'b0010 ,remthree = 4'b0100 ,remzero = 4'b1000;
+reg [3:0] ps ,ns;
+
+always @(posedge clk)
+begin
+if(rst)
+ps <= idle;
+else
+ps <= ns;
+end
+
+always @(ps ,in)
+begin
+case(ps)
+idle     : ns = in ? remone   : idle;
+remone   : ns = in ? remthree : remtwo;
+remtwo   : ns = in ? remone   : remzero;
+remthree : ns = in ? remthree : remtwo;
+remzero  : ns = in ? remone   : remzero;
+endcase
+end
+
+assign out = (ps == remzero) ? 1'b1 : 1'b0;
+
+endmodule
+
+module tb;
+
+reg clk ,rst ,in;
+wire out;
+
+fsm4 dut(clk ,rst ,in ,out);
+
+always #5 clk = ~clk;
+
+initial
+begin
+clk = 1'b0;
+rst = 1'b1;
+#6
+rst = 1'b0;
+#9;
+in = 0;
+#20;
+in = 1'b1;
+#10;
+in = 1'b1;
+#10;
+in = 1'b1;
+#10;
+in = 1'b0;
+#20;
+in = 1'b1;
+#10;
+in = 1'b1;
+#10;
+in = 1'b0;
+#10;
+in = 1'b1;
+#10;
+in = 1'b1;
+#10;
+in = 1'b1;
+#20;
+in = 1'b1;
+#10 ;
+in = 1'b0;
+#10 ;
+in = 1'b0;
+#10 ;
+in = 1'b1;
+end
+
+endmodule
+
 
     
 
