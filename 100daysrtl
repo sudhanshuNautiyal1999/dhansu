@@ -2824,9 +2824,9 @@ always @(posedge clk)
 begin
 if(rst)
 begin
-hr  <= 8'b0000_0000;
-mm  <= 8'b0000_0000;
-ss <= 8'b0000_0000;
+hr   <= 8'b0000_0000;
+mm   <= 8'b0000_0000;
+ss   <= 8'b0000_0000;
 hour <= 0;
 min  <= 0;
 sec  <= 0;
@@ -2843,8 +2843,8 @@ min <= min + 1;
 mm  <= min + 1;
 if(mm == 59)
 begin
-min <= 0;
-mm  <= 8'b0000_0000;
+min  <= 0;
+mm   <= 8'b0000_0000;
 hour <= hour + 1;
 hr   <= hour + 1;
 if(hr == 23)
