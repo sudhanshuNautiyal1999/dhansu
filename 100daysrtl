@@ -2811,6 +2811,74 @@ end
 
 endmodule
 
+46) CLOCK TIMER(24 HOUR SYSTEM)
+
+module clock(clk ,rst ,hr ,mm ,ss);
+
+input clk ,rst;
+output reg [7:0] hr ,mm ,ss;
+
+integer hour ,min ,sec;
+
+always @(posedge clk)
+begin
+if(rst)
+begin
+hr  <= 8'b0000_0000;
+mm  <= 8'b0000_0000;
+ss <= 8'b0000_0000;
+hour <= 0;
+min  <= 0;
+sec  <= 0;
+end
+else
+begin
+sec <= sec + 1;
+ss  <= sec;
+if(ss == 59)
+begin
+sec <= 0;
+ss  <= 8'b0000_0000;
+min <= min + 1;
+mm  <= min + 1;
+if(mm == 59)
+begin
+min <= 0;
+mm  <= 8'b0000_0000;
+hour <= hour + 1;
+hr   <= hour + 1;
+if(hr == 23)
+begin
+hour <= 0;
+hr   <= 8'b0000_0000;
+end
+end
+end
+end
+end
+
+endmodule
+
+module tb;
+
+reg clk ,rst;
+wire [7:0] hr ,mm ,ss;
+
+clock dut(clk ,rst ,hr ,mm ,ss);
+
+always #5 clk = ~clk;
+
+initial
+begin
+clk = 1'b0;
+rst = 1'b1;
+#6
+rst = 1'b0;
+end
+
+endmodule
+
+
 
     
 
