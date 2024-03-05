@@ -2878,6 +2878,106 @@ end
 
 endmodule
 
+47) LIFO BUFFER
+
+module lifo(clk ,rst ,en ,rw ,datain ,dataout ,empty ,full);
+
+input  clk ,rst ,en ,rw;
+input  [7:0] datain;
+output empty ,full;
+output reg [7:0] dataout;
+
+reg [7:0] lifobuffer[15:0];
+reg [4:0] skptr;
+
+integer i;
+
+always @(posedge clk)
+begin
+if(rst)
+begin
+for(i = 0 ;i<=15 ;i = i + 1)
+lifobuffer[i] = 8'b0000_0000;
+skptr         = 5'b00000;
+end
+else if(!full & en & !rw)
+begin
+lifobuffer[skptr] = datain;
+skptr             = skptr + 1'b1;
+end
+else if(!empty & en & rw)
+begin
+skptr             = skptr - 1'b1;
+dataout           = lifobuffer[skptr];
+lifobuffer[skptr] = 8'b0000_0000;
+end
+end
+
+assign full  = (skptr == 5'b10000) ? 1'b1 : 1'b0;
+assign empty = (skptr == 5'b00000) ? 1'b1 : 1'b0;
+
+endmodule
+
+
+module tb;
+
+reg  clk ,rst ,en ,rw;
+reg  [7:0] datain;
+wire empty ,full;
+wire [7:0] dataout;
+
+lifo dut(clk ,rst ,en ,rw ,datain ,dataout ,empty ,full);
+
+
+always #5 clk = ~clk;
+
+initial
+begin
+clk = 1'b0;
+rst = 1'b1;
+#6
+rst = 1'b0;
+en  = 1'b1;
+#9;
+rw     = 1'b0;
+datain = 8'b1000_0001;
+#10;
+datain = 8'b1000_0010;
+#10;
+datain = 8'b1000_0011;
+#10;
+datain = 8'b1000_0111;
+#10;
+datain = 8'b1000_1111;
+#10;
+datain = 8'b1001_1111;
+#10;
+datain = 8'b1011_1111;
+#10;
+datain = 8'b1111_1111;
+#10;
+datain = 8'b1111_1000;
+#10;
+datain = 8'b1111_0000;
+#10;
+datain = 8'b1010_1010;
+#10;
+datain = 8'b0000_1111;
+#10;
+datain = 8'b1111_1111;
+#10;
+datain = 8'b1000_0001;
+#10;
+datain = 8'b0000_1111;
+#10;
+datain = 8'b1001_1001;
+#10;
+rw = 1'b1;
+end
+
+endmodule
+
+
 
 
     
