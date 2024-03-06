@@ -2977,6 +2977,41 @@ end
 
 endmodule
 
+48) HDLBITS(https://hdlbits.01xz.net/wiki/Exams/m2014_q6)
+
+module top_module(clk ,reset ,w ,z);
+    
+    input clk ,reset ,w;
+    output  z;
+    
+    parameter A = 5'b00000 ,B = 5'b00001 ,C = 5'b00010 ,D = 5'b00100 ,E = 5'b01000 ,F = 5'b10000;
+    reg [4:0] ps ,ns;
+    
+    always @(posedge clk)
+        begin
+            if(reset)
+                ps <= A;
+            else
+                ps <= ns;
+        end
+    
+    always @(ps ,w)
+        begin
+            case(ps)
+                A : ns = w ? A : B;
+                B : ns = w ? D : C;
+                C : ns = w ? D : E;
+                D : ns = w ? A : F;
+                E : ns = w ? D : E;
+                F : ns = w ? D : C;
+            endcase
+        end
+    
+    assign z = ( ps == E || ps == F ) ? 1'b1 : 1'b0;
+    
+endmodule
+
+
 
 
 
