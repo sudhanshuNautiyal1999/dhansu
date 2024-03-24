@@ -3080,6 +3080,86 @@ end
 
 endmodule
 
+50) 4 Bit Controlled Buffer Register
+
+module flipflop(clk ,rst ,in ,out);
+
+input clk ,rst ,in;
+output reg out;
+
+always @(posedge clk)
+begin
+if(~rst) // reset is active low
+out <= 1'b0;
+else
+out <= in;
+end
+
+endmodule
+
+module combcircuit(in1 ,in2 ,in3 ,out1);//in3 output of FF and in2 is the main input and in1 is load
+
+input in1 ,in2 ,in3;
+output out1;
+wire w1 ,w2 ,w3;
+
+and a1(w1 ,in1 ,in2);
+not n1(w3 ,in1);
+and a2(w2 ,w3 ,in3);
+or  o1(out1 ,w1 ,w2);
+
+endmodule
+
+module buffercontroller(clk ,clr ,load ,datain ,dataout);
+
+input clk ,clr ,load;
+input  [3:0] datain;
+output [3:0] dataout;
+
+wire [3:0] w;
+
+combcircuit c1(load ,datain[0] ,dataout[0]  ,w[0]);
+flipflop    f1(clk  ,clr   ,w[0]      ,dataout[0]);
+combcircuit c2(load ,datain[1] ,dataout[1]  ,w[1]);
+flipflop    f2(clk  ,clr   ,w[1]      ,dataout[1]);
+combcircuit c3(load ,datain[2] ,dataout[2]  ,w[2]);
+flipflop    f3(clk  ,clr   ,w[2]      ,dataout[2]);
+combcircuit c4(load ,datain[3] ,dataout[3]  ,w[3]);
+flipflop    f4(clk  ,clr   ,w[3]      ,dataout[3]);
+
+endmodule
+
+module tb;
+
+reg  clk ,clr ,load;
+reg  [3:0] datain;
+wire [3:0] dataout;
+
+buffercontroller dut(clk ,clr ,load ,datain ,dataout);
+
+always #5 clk = ~clk;
+
+initial
+begin
+clk    = 1'b0;
+clr    = 1'b0;
+load   = 1'b1;
+#6
+clr    = 1'b1;
+#9;
+datain = 4'b1111;
+#10;
+load   = 1'b0;
+datain = 4'b1010;
+#20
+load   = 1'b1;
+datain = 4'b1010;
+
+end
+
+endmodule
+
+
 
 
 
