@@ -3159,6 +3159,37 @@ end
 
 endmodule
 
+51) HDLBITS(https://hdlbits.01xz.net/wiki/Exams/2014_q3bfsm)
+
+module top_module(clk ,reset ,x ,z);
+    
+    input clk ,reset ,x;
+    output  z;
+    
+    parameter S0 = 4'b000 ,S1 = 4'b001 ,S2 = 4'b010 ,S3 = 4'b011 ,S4 = 4'b100;
+    reg [2:0] ps ,ns;
+    
+    always @(posedge clk)
+        begin
+            if(reset)
+                ps <= S0;
+            else
+                ps <= ns;
+            
+        end
+    
+    always @(ps ,x)
+        case(ps)
+            S0 : ns = x ? S1 : S0;
+            S1 : ns = x ? S4 : S1;
+            S2 : ns = x ? S1 : S2;
+            S3 : ns = x ? S2 : S1;
+            S4 : ns = x ? S4 : S3;
+        endcase
+    
+    assign z = (ps == S3 || ps == S4) ? 1'b1 : 1'b0;
+    
+endmodule
 
 
 
