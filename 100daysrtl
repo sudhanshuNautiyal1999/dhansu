@@ -3191,6 +3191,75 @@ module top_module(clk ,reset ,x ,z);
     
 endmodule
 
+52) Frequency Divider by 5 
+
+module counter(clk ,rst ,out);
+
+input clk ,rst;
+output reg [2:0] out;
+
+always @(posedge clk)
+begin
+if(rst)
+out <= 3'b000;
+else if(out == 3'b100)
+out <= 3'b000;
+else
+out <= out + 1'b1;
+end
+
+endmodule
+
+module flipflop(clk ,rst ,in ,out);
+
+input clk ,rst ,in;
+output reg out;
+
+always @(negedge clk)
+begin
+if(rst)
+out <= 1'b0;
+else
+out <= in;
+end
+
+endmodule
+
+module divider(clk ,rst ,out);
+
+input clk ,rst;
+output out;
+
+wire [2:0] w;
+wire w1;
+counter  c1(clk ,rst ,w);
+flipflop f1(clk ,rst ,w[1] ,w1);
+or(out ,w[1] ,w1);
+
+endmodule
+
+
+module tb;
+
+reg clk ,rst;
+wire out;
+
+divider dut(clk ,rst ,out);
+
+always #5 clk = ~clk;
+
+initial
+begin
+clk = 1'b0;
+rst = 1'b1;
+#11;
+rst = 1'b0;
+end
+
+endmodule
+
+
+
 
 
 
