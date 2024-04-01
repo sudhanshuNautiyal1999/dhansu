@@ -3258,6 +3258,68 @@ end
 
 endmodule
 
+53) Frequency Divider by 6
+
+module FF(clk ,rst ,in ,out ,outbar);
+
+input clk ,rst ,in;
+output reg out ,outbar;
+
+always @(posedge clk)
+begin
+if(rst)
+begin
+out    <= 1'b0;
+outbar <= 1'b1;
+end
+else
+begin
+out    <= in;
+outbar <= ~in;
+end
+end
+
+endmodule
+
+module frequencydividebysix(clk ,rst ,out);
+
+input clk ,rst;
+output out;
+
+wire [2:0] outbar;
+wire [1:0] out_put;
+
+FF F1(clk ,rst ,outbar[2]  ,out_put[0] ,outbar[0]);
+FF F2(clk ,rst ,out_put[0] ,out_put[1] ,outbar[1]);
+FF F3(clk ,rst ,out_put[1] ,out        ,outbar[2]);
+
+endmodule
+
+module tb;
+
+reg clk ,rst;
+wire out;
+
+frequencydividebysix dut(clk ,rst ,out);
+
+always #5 clk = ~clk;
+
+initial
+begin
+clk = 1'b0;
+rst = 1'b1;
+#6;
+rst = 1'b0;
+end
+
+endmodule
+
+
+
+
+
+
+
 
 
 
