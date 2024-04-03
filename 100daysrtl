@@ -3314,6 +3314,54 @@ end
 
 endmodule
 
+54) fibonacci series
+
+module fibonacci(clk ,rst ,out);
+
+input clk ,rst;
+output reg [7:0] out;
+reg [7:0] help;
+
+always @(posedge clk)
+begin
+if(rst)
+begin
+out  <= 8'b0000_0000;
+help <= 8'b0000_0001;
+end
+else
+begin
+out  <= out + help;
+help <= out;
+end
+end
+
+endmodule
+
+module tb;
+
+reg clk ,rst;
+wire [7:0] out;
+
+fibonacci dut(clk ,rst ,out);
+
+always #5 clk = ~clk;
+
+initial
+begin
+clk = 1'b0;
+rst = 1'b1;
+#6;
+rst = 1'b0;
+end
+
+initial
+begin
+#80;
+$finish();
+end
+endmodule
+
 
 
 
