@@ -3362,6 +3362,103 @@ $finish();
 end
 endmodule
 
+55) Factorial of a number
+
+module fact(clk ,rst ,number ,factorialofnumber);
+
+input  clk ,rst;
+input  [3:0] number;
+output reg [31:0] factorialofnumber;
+
+parameter idle = 3'b0001 ,checker = 3'b010 ,operation = 3'b100 ,result = 3'b000;
+reg [2:0]  ps ,ns;
+reg [31:0]  num ,tempnum ,capture;
+reg [31:0] count;
+reg [31:0] sum;
+
+
+always @(posedge clk)
+begin
+if(rst)
+ps <= idle;
+else
+ps <= ns;
+end
+
+always @(ps ,num ,count ,number)
+begin
+case(ps)
+idle      : ns = (number == 0 || number == 1) ? result : checker;
+checker   : ns = (num == 4'b0001) ? result : operation;
+operation : ns = (count == 1) ? checker : operation;
+result    : ns = result;
+endcase
+end
+
+always @(posedge clk)
+begin
+if(rst)
+begin
+num               <= number - 1;
+tempnum           <= number;
+count             <= 32'b00000000000000000000000000000000;
+sum               <= 32'b00000000000000000000000000000000;
+capture           <= 32'b00000000000000000000000000000000;
+end
+else if(ps == checker)
+begin
+count             <= num;
+capture           <= tempnum;
+factorialofnumber <= sum;
+sum               <= 32'b00000000000000000000000000000000;
+end
+else if(ps == operation)
+begin
+if(count != 0)
+begin
+sum   <= sum + tempnum;
+count <= count - 1;
+if(count == 1)
+begin
+tempnum <= sum + capture;
+num     <= num - 1;
+end
+end
+end
+else if(ps == result)
+begin
+if(number == 0 || number == 1)
+factorialofnumber <= 1;
+end
+end
+
+endmodule
+
+module tb;
+
+reg  clk ,rst;
+reg  [3:0] number;
+wire [31:0] factorialofnumber;
+
+fact dut(clk ,rst ,number ,factorialofnumber);
+
+always #5 clk = ~clk;
+
+initial
+begin
+clk = 1'b0;
+rst = 1'b1;
+number = 4'b0111;
+#6
+rst = 1'b0;
+end
+
+endmodule
+
+
+
+
+
 
 
 
