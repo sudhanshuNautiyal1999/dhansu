@@ -3455,6 +3455,56 @@ end
 
 endmodule
 
+56) Write code for following pattern
+    0000_0001 ,0001_0000 ,0000_0001 ,0010_0000 ,0000_0001 ,0100_0000 ,0000_0001 ,1000_0000 and repeat
+
+module pattern(clk ,rst ,out);
+
+input clk ,rst;
+output reg [7:0] out;
+reg [3:0] temp;
+reg check;
+
+always @(posedge clk)
+begin
+if(rst)
+begin
+out   <= 8'b0000_0001;
+temp  <= 4'b0100;
+check <= 1'b1;
+end
+else
+begin
+out   <= check & 1'b1 ? (out[7] ? 8'b0000_0001 : out << temp) : (out[7] ? 8'b0000_0001 : out >> temp);
+temp  <= check & 1'b1 ? temp : ((temp[2] & temp[1] & temp[0]) ? 4'b0100:temp + 1'b1);
+check <= ~check;
+end
+end
+
+endmodule
+
+module tb;
+
+reg clk ,rst;
+wire [7:0] out;
+
+pattern dut(clk ,rst ,out);
+
+always # 5 clk = ~clk;
+
+initial
+begin
+clk = 1'b0;
+rst = 1'b1;
+#6;
+rst = 1'b0;
+end
+
+endmodule
+
+
+
+
 
 
 
