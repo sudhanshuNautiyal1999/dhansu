@@ -3502,6 +3502,76 @@ end
 
 endmodule
 
+57) A finite state machine has one input and one output. The output becomes 1 and remains 1 thereafter 
+when at least two 0's and two 1's have occurred as inputs, regardless of the order of appearance.
+
+module orderone(clk ,rst ,in ,out);
+
+input clk ,rst ,in;
+output out;
+
+parameter S0 = 4'b0000 ,S1 = 4'b0001 ,S2 = 4'b0010 ,S3 = 4'b0011 ,S4 = 4'b0101 ,S5 = 4'b0110 ,S6 = 4'b0111 ,S7 = 4'b1000 ,S8 = 4'b0100;
+reg [3:0] ps ,ns;
+
+always @(posedge clk)
+begin
+if(rst)
+ps <= S0;
+else
+ps <= ns;
+end
+
+always @(ps ,in)
+begin
+case(ps)
+S0 : ns = in ? S4 : S1;
+S1 : ns = in ? S8 : S2;
+S2 : ns = in ? S3 : S2;
+S3 : ns = in ? S5 : S3;
+S4 : ns = in ? S6 : S8;
+S5 : ns = S5;
+S6 : ns = in ? S6 : S7;
+S7 : ns = in ? S7 : S5;
+S8 : ns = in ? S7 : S3;
+endcase
+end
+
+assign out = (ps == S5) ? 1'b1 : 1'b0;
+
+endmodule
+
+module tb;
+
+reg clk ,rst ,in;
+wire out;
+
+orderone dut(clk ,rst ,in ,out);
+
+always #5 clk = ~clk;
+
+initial
+begin
+clk = 1'b0;
+rst = 1'b1;
+in  = 1'b0;
+#6;
+rst = 1'b0;
+#9;
+in  = 1'b1;
+#10;
+in  = 1'b1;
+#10;
+in  = 1'b1;
+#10;
+in  = 1'b1;
+#10;
+in  = 1'b0;
+
+end
+
+endmodule
+
+
 
 
 
