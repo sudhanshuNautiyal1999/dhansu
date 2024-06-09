@@ -3571,6 +3571,88 @@ end
 
 endmodule
 
+58) DICE GAME
+    The player will guess a number between 1 and 6 and enter it as a binary number in the "dice_guess" input of the 
+    main module.The player will hold the dice for a random time length (set to 1 the "roll_dice" input).During this 
+    time, the electronic dice will roll through the 6 numbers of the dice over and over.The player will then release
+    (set to 0) the "roll_dice" input which will cause the dice to stop rolling. At this point, the "dice_output" 
+    should stop on a number between 1 and 6 (just like a real dice). If the number displayed by the dice is the same
+    as the number the player entered, the output will be win = 1 and lose = 0. If the "dice_guess" is different than
+    the "dice_output", then the output will show win = 0 and lose = 1.To start another game, the player must set 
+    reset to 1 for at least one clock cycle and then back to 0, then enter a new guess number, and roll the dice again.
+
+
+module dice(clk ,rst ,dice_guess ,roll_dice ,dice_output ,win ,lose);
+
+input clk ,rst ,roll_dice;
+input [2:0] dice_guess;
+output reg win ,lose;
+output reg [2:0] dice_output;
+
+always @(posedge clk)
+begin
+if(rst)
+begin
+dice_output <= 3'b000;
+win         <= 1'b0;
+lose        <= 1'b0;
+end
+else
+begin
+if(~(&dice_guess) && roll_dice == 1'b1)
+dice_output <= {$random} % 6;
+else if(roll_dice == 1'b0)
+begin
+if(dice_guess == dice_output)
+begin
+win  <= 1'b1;
+lose <= 1'b0;
+end
+else
+begin
+win  <= 1'b0;
+lose <= 1'b1;
+end
+end
+end
+end
+  
+endmodule
+
+module tb;
+  
+  reg clk ,rst ,roll_dice;
+  reg [2:0] dice_guess;
+  wire win ,lose;
+  wire [2:0] dice_output;
+  
+  always #5 clk = ~clk;
+  
+  dice dut(clk ,rst ,dice_guess ,roll_dice ,dice_output ,win ,lose);
+  
+  initial
+    begin
+      clk = 1'b0;
+      rst = 1'b1;
+      #6;
+      rst = 1'b0;
+      #9;
+      dice_guess = 5;
+      roll_dice  = 1'b1;
+      #40;
+      roll_dice  = 1'b0;
+      
+    end
+  
+  initial begin
+  $dumpfile("dump.vcd");
+  $dumpvars;
+  #10000 
+  $finish;
+end
+  
+endmodule
+  
 
 
 
