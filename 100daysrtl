@@ -3652,6 +3652,84 @@ module tb;
 end
   
 endmodule
+
+59) Design a moore FSM state with one input A and output X and Y. X should be 1 if A has been 1 for at least three clock cycle 
+    altogther(not neccesaly consecutively). Y should be 1 if A has been 1 for at least two consecutively clock cycle.
+
+module fsmdesign(clk ,rst ,IN ,X ,Y);
+
+input clk ,rst ,IN;
+output X ,Y;
+
+parameter A = 4'b0000 ,B = 4'b0001 ,C = 4'b0010 ,D = 4'b0011 ,E = 4'b0100 ,F = 4'b0101 ,G = 4'b0110 ,H = 4'b0111 ,I = 4'b1000;
+reg [3:0] ps ,ns;
+
+always @(posedge clk)
+begin
+if(rst)
+ps <= A;
+else
+ps <= ns;
+end
+
+always @(ps ,IN)
+begin
+case(ps)
+A : ns = IN ? B : A;
+B : ns = IN ? C : F;
+C : ns = IN ? D : G;
+D : ns = IN ? D : E;
+E : ns = IN ? H : E;
+F : ns = IN ? I : F;
+G : ns = IN ? H : G;
+H : ns = IN ? D : E;
+I : ns = IN ? D : G; 
+endcase
+end
+
+assign X = (ps == D || ps == H || ps == E) ? 1'b1 : 1'b0;
+assign Y = (ps == D || ps == C) ? 1'b1 : 1'b0;
+
+
+endmodule
+
+module tb;
+
+reg clk ,rst ,IN;
+wire X ,Y;
+
+fsmdesign dut(clk ,rst ,IN ,X ,Y);
+
+always #5 clk = ~clk;
+
+initial
+begin
+clk = 1'b0;
+rst = 1'b1;
+IN  = 1'b0;
+#6;
+rst = 1'b0;
+#9;
+IN  = 1'b0;
+#10;
+IN  = 1'b1;
+#10;
+IN  = 1'b0;
+#10;
+IN  = 1'b1;
+#10;
+IN  = 1'b1;
+#10;
+IN  = 1'b1;
+#10;
+IN  = 1'b1;
+
+end
+
+endmodule
+
+
+
   
 
 
