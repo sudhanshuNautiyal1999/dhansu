@@ -3728,6 +3728,81 @@ end
 
 endmodule
 
+60) FIZZBUZZ GAME
+     Rules of the game:
+     If the number is a multiple of the 5 and not a multiple of 7, you will make Fizz port high
+     If the number is a multiple of the 7 and not a multiple of 5, you will make Buzz port high
+     If the number is a multiple of the 7 and 5, you will make FizzBuzz port high
+     Otherwise, you will make all flag ports low
+
+module fizzbuzz(clk ,rst ,data ,fizz ,buzz ,fizzbuzz);
+
+input clk ,rst;
+input [7:0] data;
+output reg fizz ,buzz ,fizzbuzz;
+
+reg [7:0] five ,seven;
+
+always @(posedge clk)
+begin
+if(rst)
+begin
+five  <= 8'b0000_0000;
+seven <= 8'b0000_0000;
+end
+else
+begin
+if(five == data && seven == data)
+fizzbuzz <= 1'b1;
+else if(five == data && seven > data)
+fizz <= 1'b1;
+else if(five > data && seven == data)
+buzz <= 1'b1;
+else if(five < data && seven >= data)
+five <= five + 8'b0000_0101;
+else if(five >= data && seven < data)
+seven <= seven + 8'b0000_0111;
+else if(five < data && seven < data)
+begin
+five  <= five  + 8'b0000_0101;
+seven <= seven + 8'b0000_0111;
+end
+else
+begin
+fizz     <= 1'b0;
+buzz     <= 1'b0;
+fizzbuzz <= 1'b0;
+end
+end
+end
+
+endmodule
+
+
+module tb;
+
+reg clk ,rst;
+reg [7:0] data;
+wire fizz ,buzz ,fizzbuzz;
+
+fizzbuzz dut(clk ,rst ,data ,fizz ,buzz ,fizzbuzz);
+
+always #5 clk = ~clk;
+
+initial
+begin
+clk = 1'b0;
+rst = 1'b1;
+#6 
+rst = 1'b0;
+#9
+data = 63;
+end
+
+endmodule
+
+
+
 
 
   
