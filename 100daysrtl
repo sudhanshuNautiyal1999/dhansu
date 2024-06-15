@@ -3572,14 +3572,14 @@ end
 endmodule
 
 58) DICE GAME
-    The player will guess a number between 1 and 6 and enter it as a binary number in the "dice_guess" input of the 
-    main module.The player will hold the dice for a random time length (set to 1 the "roll_dice" input).During this 
-    time, the electronic dice will roll through the 6 numbers of the dice over and over.The player will then release
-    (set to 0) the "roll_dice" input which will cause the dice to stop rolling. At this point, the "dice_output" 
-    should stop on a number between 1 and 6 (just like a real dice). If the number displayed by the dice is the same
-    as the number the player entered, the output will be win = 1 and lose = 0. If the "dice_guess" is different than
-    the "dice_output", then the output will show win = 0 and lose = 1.To start another game, the player must set 
-    reset to 1 for at least one clock cycle and then back to 0, then enter a new guess number, and roll the dice again.
+The player will guess a number between 1 and 6 and enter it as a binary number in the "dice_guess" input of the 
+main module.The player will hold the dice for a random time length (set to 1 the "roll_dice" input).During this 
+time, the electronic dice will roll through the 6 numbers of the dice over and over.The player will then release
+(set to 0) the "roll_dice" input which will cause the dice to stop rolling. At this point, the "dice_output" 
+should stop on a number between 1 and 6 (just like a real dice). If the number displayed by the dice is the same
+as the number the player entered, the output will be win = 1 and lose = 0. If the "dice_guess" is different than
+the "dice_output", then the output will show win = 0 and lose = 1.To start another game, the player must set 
+reset to 1 for at least one clock cycle and then back to 0, then enter a new guess number, and roll the dice again.
 
 
 module dice(clk ,rst ,dice_guess ,roll_dice ,dice_output ,win ,lose);
@@ -3654,7 +3654,7 @@ end
 endmodule
 
 59) Design a moore FSM state with one input A and output X and Y. X should be 1 if A has been 1 for at least three clock cycle 
-    altogther(not neccesaly consecutively). Y should be 1 if A has been 1 for at least two consecutively clock cycle.
+altogther(not neccesaly consecutively). Y should be 1 if A has been 1 for at least two consecutively clock cycle.
 
 module fsmdesign(clk ,rst ,IN ,X ,Y);
 
@@ -3800,6 +3800,99 @@ data = 63;
 end
 
 endmodule
+
+61) A sequential circuit has two inputs and two outputs. The inputs X1 and X2 represent a 2-
+bit unsigned binary number denoted by N. Here, X1 is most significant bit of N, and X2 is
+the least significant bit of N. The outputs are denoted by Z1, Z2. If the present value of N
+is greater than the previous value, then Z1 is 1. If the present value of N is less than the
+previous value, then Z2 is 1. Otherwise, Z1 and Z2 are 0. When the first pair of inputs is
+received, there is no previous value of N, so we cannot determine whether the present N
+is greater than or less than the previous value; therefore, the “otherwise” category applies,
+i.e. both Z1and Z2 are 0.
+NOTE :- NOT USE ">" ,"<" ,"==" operater HINT :- FSM
+
+module camparefsm(clk ,rst ,X ,Z);
+
+input clk ,rst;
+input [1:0] X;
+output reg [1:0] Z;
+
+parameter A = 4'b0000 ,zerozero = 4'b0001 ,zeroone = 4'b0010 ,onezero = 4'b0100 ,oneone = 4'b1000;
+reg [3:0] ps ,ns;
+
+always @(posedge clk)
+begin
+if(rst)
+ps <= A;
+else
+ps <= ns;
+end
+
+always @(ps ,X)
+begin
+case(ps)
+A        : begin
+ns = X[1] ^ X[0] ? (X[1] ? onezero : zeroone) : (X[1] ? oneone : zerozero);
+Z  = 2'b00;
+end
+zerozero : begin
+ns = X[1] ^ X[0] ? (X[1] ? onezero : zeroone) : (X[1] ? oneone : zerozero);
+Z  = X[1] ^ X[0] ? 2'b10 : (X[1] ? 2'b10 : 2'b00);
+end
+zeroone  : begin
+ns = X[1] ^ X[0] ? (X[1] ? onezero : zeroone) : (X[1] ? oneone : zerozero);
+Z  = X[1] ^ X[0] ? (X[1] ? 2'b10 : 2'b00) : (X[1] ? 2'b10 : 2'b01);
+end
+onezero  : begin
+ns = X[1] ^ X[0] ? (X[1] ? onezero : zeroone) : (X[1] ? oneone : zerozero);
+Z  = X[1] ^ X[0] ? (X[1] ? 2'b00 : 2'b01) :(X[1] ? 2'b10 : 2'b01); 
+end
+oneone   : begin
+ns = X[1] ^ X[0] ? (X[1] ? onezero : zeroone) : (X[1] ? oneone : zerozero);
+Z  = X[1] ^ X[0] ? 2'b01  : (X[1] ? 2'b00 : 2'b01);
+end
+endcase
+end
+
+endmodule
+
+module tb;
+
+reg clk ,rst;
+reg [1:0] X;
+wire [1:0] Z;
+
+camparefsm dut(clk ,rst ,X ,Z);
+
+always #5 clk = ~clk;
+
+initial
+begin
+clk = 1'b0;
+rst = 1'b1;
+X = 2'b00;
+#6
+rst = 1'b0;
+#9
+X = 2'b10;
+#10;
+X = 2'b00;
+#10;
+X = 2'b10;
+#10;
+X = 2'b11;
+#10;
+X = 2'b10;
+#10;
+X = 2'b01;
+#10;
+X = 2'b10;
+end
+
+endmodule
+
+
+
 
 
 
