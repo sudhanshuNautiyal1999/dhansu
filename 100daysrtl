@@ -3809,6 +3809,7 @@ previous value, then Z2 is 1. Otherwise, Z1 and Z2 are 0. When the first pair of
 received, there is no previous value of N, so we cannot determine whether the present N
 is greater than or less than the previous value; therefore, the “otherwise” category applies,
 i.e. both Z1and Z2 are 0.
+Z = [Z1 ,Z2]
 NOTE :- NOT USE ">" ,"<" ,"==" operater HINT :- FSM
 
 module camparefsm(clk ,rst ,X ,Z);
