@@ -3892,6 +3892,82 @@ end
 
 endmodule
 
+62) Chech wheather input in present cycle is same as previous cycle using FSM.If input in present
+cycle is same as previous cycle then output is 1 else output is 0
+
+module samecycle(clk ,rst ,in ,out);
+
+input clk ,rst ,in;
+output  out;
+
+parameter A = 4'b0000 ,B = 4'b0001 ,C = 4'b0010 ,D = 4'b0100 ,E = 4'b1000;
+reg [3:0] ps ,ns;
+
+always @(posedge clk)
+begin
+if(rst)
+ps <= A;
+else
+ps <= ns;
+end
+
+always @(ps ,in)
+begin
+case(ps)
+A : ns = in ? B : D;
+B : ns = in ? C : D;
+C : ns = in ? C : D;
+D : ns = in ? B : E;
+E : ns = in ? B : E;
+endcase
+end
+
+assign out = (ps == C || ps == E) ? 1'b1 : 1'b0; 
+
+endmodule
+
+module tb;
+
+reg clk ,rst ,in;
+wire  out;
+
+samecycle dut(clk ,rst ,in ,out);
+
+always #5 clk = ~clk;
+
+initial
+begin
+clk = 1'b0;
+rst = 1'b1;
+in  = 1'b0;
+#6
+rst = 1'b0;
+#9
+in  = 1'b1;
+#10
+in  = 1'b0;
+#10
+in  = 1'b1;
+#10
+in  = 1'b0;
+#10
+in  = 1'b1;
+#10
+in  = 1'b0;
+#10
+in  = 1'b1;
+#10
+in  = 1'b1;
+#10
+in  = 1'b0;
+#10
+in  = 1'b0;
+#10
+in  = 1'b1;
+end
+
+endmodule
+
 
 
 
