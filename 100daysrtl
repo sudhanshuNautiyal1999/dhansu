@@ -3968,6 +3968,47 @@ end
 
 endmodule
 
+63) Find the determinant of 2 X 2 matrix.
+
+Note - ALL THE INPUT SHOULD BE POSTIVE BUT OUTPUT CAN BE NEGATIVE
+
+module determinant(matrix ,result);
+
+input [3:0] matrix [0:1][0:1];
+output signed [7:0]result;
+
+assign result = matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
+
+endmodule
+
+module tb;
+  
+  reg [3:0] matrix [0:1][0:1];
+  wire signed [7:0]result;
+  
+  determinant dut(matrix ,result);
+  
+  initial
+    begin
+      matrix[0][0] = 8;
+      matrix[0][1] = 5;
+      matrix[1][0] = 5;
+      matrix[1][1] = 5;
+    end
+  
+  initial begin
+  $dumpfile("dump.vcd");
+  $dumpvars;
+  #10; 
+  $finish;
+end
+  
+endmodule
+
+
+
+
+
 
 
 
