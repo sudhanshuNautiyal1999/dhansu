@@ -3996,14 +3996,103 @@ module tb;
       matrix[1][1] = 5;
     end
   
-  initial begin
-  $dumpfile("dump.vcd");
-  $dumpvars;
-  #10; 
-  $finish;
-end
-  
 endmodule
+
+64) Restoring Division Algorithm For 4 Bit Unsigned Integer
+
+module restoring(clk ,rst ,divisor ,dividend ,remainder ,Quotient);
+
+input clk ,rst;
+input [3:0] divisor ,dividend;
+output [3:0] remainder ,Quotient;
+
+parameter idle = 4'b0000 ,shift_operation = 4'b0001 ,add = 4'b0010 ,check_one = 4'b0100 ,substract = 4'b1000 ,check_two = 4'b1100 ,result = 4'b0011;
+reg [3:0] ps ,ns;
+reg [3:0] n;
+reg [4:0] m ,store_a;
+reg [8:0] shift_aq;
+
+
+always @(posedge clk)
+begin
+if(rst)
+ps <= idle;
+else
+ps <= ns;
+end
+
+always @(ps ,divisor ,dividend ,n)
+begin
+case(ps)
+idle            : ns = shift_operation;
+shift_operation : ns = add;
+add             : ns = check_one;
+check_one       : ns = substract;
+substract       : ns = check_two;
+check_two       : ns = (n == 1'b0) ? result : shift_operation;
+result          : ns = result;
+endcase
+end
+
+always @(posedge clk)
+begin
+if(ps == idle)
+begin
+n <= 4'b0100;
+shift_aq <= {5'b0000 ,dividend};
+m <= {1'b1,~divisor[3] ,~divisor[2] ,~divisor[1] ,~divisor[0]} + 1'b1;
+end
+else if(ps == shift_operation)
+shift_aq <= shift_aq << 1'b1;
+else if(ps == add)
+begin
+store_a       <= shift_aq[8:4];
+shift_aq[8:4] <= shift_aq[8:4] + m;
+end
+else if(ps == check_one)
+begin
+if(shift_aq[8] == 1'b1)
+begin
+shift_aq[0]   <= 1'b0;
+shift_aq[8:4] <= store_a;
+end
+else
+shift_aq[0] <= 1'b1;
+end
+else if(ps == substract)
+n <= n - 1;
+end
+
+assign remainder = (ps == result) ? shift_aq[8:4] : 4'b0000;
+assign Quotient  = (ps == result) ? shift_aq[3:0] : 4'b0000;
+
+endmodule
+
+module tb;
+
+reg clk ,rst;
+reg [3:0] divisor ,dividend;
+wire [3:0] remainder ,Quotient;
+
+restoring dut(clk ,rst ,divisor ,dividend ,remainder ,Quotient);
+
+always #5 clk = ~clk;
+
+initial
+begin
+clk = 1'b0;
+rst = 1'b1;
+#6;
+rst = 1'b0;
+#9;
+dividend = 4'b1110;
+divisor  = 4'b0010;
+end
+
+endmodule
+
+
+
 
 
 
