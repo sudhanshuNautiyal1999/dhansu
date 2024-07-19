@@ -4152,6 +4152,48 @@ end
 
 endmodule
 
+66) Cs450/timer(https://hdlbits.01xz.net/wiki/Cs450/timer)
+
+module top_module(clk ,load ,data ,tc);
+    
+    input clk ,load;
+    input [9:0] data;
+    output tc;
+    
+    reg [9:0] counter;
+    
+    always @(posedge clk)
+        begin
+            if(load)
+                begin
+                    counter <= data;
+                    if(data == 0)
+                        tc <= 1'b1;
+                    else
+                        tc <= 1'b0;
+                end
+            else
+                begin
+                    if(counter == 0)
+                        begin
+                            counter <= counter;
+                            tc <= 1'b1;
+                            
+                        end
+                    else
+                        begin
+                            counter <= counter - 10'b0000000001;
+                            if (counter == 1)
+                                tc <= 1'b1;
+                        end
+                       
+                end
+        end
+    
+    
+endmodule
+
+
 
 
 
