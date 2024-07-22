@@ -35,7 +35,9 @@ in=i;
 end
 end
 endmodule
+
 2) 8 bit graycounter 
+
 module graycounteightbit(clk,out,rst);
 input clk,rst;
 output reg [2:0] out;
@@ -69,7 +71,9 @@ rst=1'b0;
 end
 always #5 clk=~clk;
 endmodule
+
 3) half adder using 4X1 mux
+
 module mux4X1(in1,in2,in3,in4,sel1,sel2,out);
 input in1,in2,in3,in4,sel1,sel2;
 output reg out;
@@ -112,7 +116,9 @@ x=1'b1;
 y=1'b1;
 end
 endmodule
+
 4) 8 X 3 Priority Encoder
+
  module prioencder(in,out);
 input [7:0]in;
 output reg [2:0]out;
@@ -148,6 +154,7 @@ in=8'b00000001; #10;
 in=8'b00000000; # 10; 
 end
 endmodule
+
 5) 8_bit_barrel_shifter
 
 module mux2X1(in0,in1,out,sel);
@@ -236,6 +243,7 @@ S0 S1 S2 input      output
 1  0  1  00001111   01111000
 1  1  0  00001111   00111100
 1  1  1  00001111   00011110
+
 6) 4*4 muliplier
 
 module Halfadder(a,b,s,c);
@@ -319,6 +327,7 @@ b=4'b1001;
 
 end
 endmodule
+
 7) 4 bit carry select adder
 
 module Fulladder(a,b,cin,sum,cout);
@@ -374,6 +383,7 @@ a=4'b1010;
 b=4'b0001;
 end
 endmodule
+
 8) 8X1 mux using 2:4 decoder
 
 module decoder(in1,in2,q);
@@ -439,6 +449,7 @@ sel=3'b101;
 in=8'b00100000;
 end
 endmodule
+
 9) 1X8 demux using 1X4 demux and 1X2 demux
 
 module demux1X2(in,sel,out);
@@ -538,7 +549,9 @@ in=1'b1;
 sel=3'b111;
 end
 endmodule
+
 10) 2X4 decoder and two mux and one xor gate
+
 module decoder2X4(a,b,out);
 input a,b;
 output reg [3:0] out;
@@ -595,7 +608,9 @@ check=1'b0;
 end
 
 endmodule
+
 11) 4 bit SISO shift register
+
 module SISO4bit(in,clk,out);
 input in,clk;
 output reg out;
@@ -662,8 +677,10 @@ $stop();
 end
 always #5 clk=!clk;
 endmodule
+
 13) 4 bit PISO shift register
- module piso(in,clk,reset,out);
+
+module piso(in,clk,reset,out);
 input [3:0]in;
 input clk,reset;
 output reg out;
@@ -742,7 +759,9 @@ rst=1'b0;
 end
 always #5 clk=~clk;
 endmodule
+
 15) 4 bit asynchronous Simultaneous “Up” and “Down” Counter
+
 module jkf(j,k,clk,out,outbar,rst);
 input j,k,clk,rst;
 output reg out,outbar;
