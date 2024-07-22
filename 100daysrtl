@@ -4193,6 +4193,38 @@ module top_module(clk ,load ,data ,tc);
     
 endmodule
 
+67) Cs450/counter 2bc(https://hdlbits.01xz.net/wiki/Cs450/counter_2bc#cite_note-1)
+
+module top_module(clk ,areset ,train_valid ,train_taken ,state);
+    
+    input clk ,areset ,train_valid ,train_taken;
+    output [1:0] state;
+    
+    parameter snt = 2'b00 ,wnt = 2'b01 ,wt = 2'b10 ,st = 2'b11;
+    reg [1:0] ps ,ns;
+    
+    always @(posedge clk or posedge areset)
+        begin
+            if(areset)
+                ps <= wnt;
+            else
+                ps <= ns;
+        end
+    
+    always @(ps ,train_valid ,train_taken)
+        begin
+            case(ps)
+                snt : ns = train_valid & train_taken ? wnt : (train_valid ? snt : snt);
+                wnt : ns = train_valid & train_taken ? wt  : (train_valid ? snt : wnt);
+                wt  : ns = train_valid & train_taken ? st  : (train_valid ? wnt : wt);
+                st  : ns = train_valid & train_taken ? st  : (train_valid ? wt  : st);
+            endcase
+        end
+    
+    assign state = ps;
+    
+endmodule
+
 
 
 
