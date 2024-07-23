@@ -4244,6 +4244,36 @@ module top_module(clk ,areset ,train_valid ,train_taken ,state);
     
 endmodule
 
+68) Cs450/history shift(https://hdlbits.01xz.net/wiki/Cs450/history_shift)
+
+module top_module(clk ,areset ,predict_valid, predict_taken, predict_history ,train_mispredicted 
+                  ,train_taken, train_history);
+    
+    input clk ,areset ,predict_valid, predict_taken ,train_mispredicted ,train_taken;
+    input [31:0] train_history;
+    output reg [31:0] predict_history;
+    
+    always @(posedge clk or posedge areset) 
+        begin
+            if(areset)
+                predict_history <= 32'b00000000000000000000000000000000;
+            else
+                begin
+                    if(predict_valid == 1 && train_mispredicted == 1)
+                        predict_history <= {train_history[30:0] ,train_taken};
+                    else if(predict_valid == 1)
+                        predict_history <= {predict_history[30:0] ,predict_taken};
+                    else if(train_mispredicted == 1)
+                        predict_history <= {train_history[30:0] ,train_taken};
+                    else
+                        predict_history <= predict_history;
+                end
+        end
+    
+endmodule
+
+
+
 
 
 
