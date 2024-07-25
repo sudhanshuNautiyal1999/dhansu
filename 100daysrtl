@@ -4272,6 +4272,53 @@ module top_module(clk ,areset ,predict_valid, predict_taken, predict_history ,tr
     
 endmodule
 
+69) Countbcd(https://hdlbits.01xz.net/wiki/Countbcd)
+
+module counter(clk ,rst ,enable ,out );
+    
+    input clk ,rst ,enable;
+    output [3:0] out;
+    
+    always @(posedge clk)
+        begin
+            if(rst)
+                out <= 4'b0000;
+            else if(enable == 1'b1)
+                begin
+                    if(out == 4'b1001)
+                        out <= 4'b0000;
+                    else
+                        out <= out + 1'b1;
+                end
+            else
+                out <= out;
+        end
+    
+endmodule
+
+module top_module(clk ,reset ,ena ,q);
+    
+    input clk ,reset;
+    output reg [3:1] ena;
+    output [15:0] q;
+    wire e;
+    
+    counter threezero(clk ,reset ,e ,q[3:0]);
+    counter sevenfour(clk ,reset ,ena[1] ,q[7:4]);
+    counter eleveneight(clk ,reset ,ena[2] ,q[11:8]);
+    counter fifteentwelve(clk ,reset ,ena[3] ,q[15:12]);
+    
+ 
+    assign e = 1'b1;
+    assign ena[1] = e && q[3:0] == 4'b1001 ? 1'b1 : 1'b0;
+    assign ena[2] = ena[1] && q[7:4] == 4'b1001 ? 1'b1 : 1'b0;
+    assign ena[3] = ena[2] && q[11:8] == 4'b1001 ? 1'b1 : 1'b0;
+                                         
+endmodule
+            
+          
+
+
 
 
 
