@@ -4315,6 +4315,62 @@ module top_module(clk ,reset ,ena ,q);
     assign ena[3] = ena[2] && q[11:8] == 4'b1001 ? 1'b1 : 1'b0;
                                          
 endmodule
+
+70) Count number of one's in a binary vector using adders
+
+module fulladder(a ,b ,cin ,cout ,sum);
+
+input a ,b ,cin;
+output cout ,sum;
+
+assign sum = a ^ b ^ cin;
+assign cout = a & b | b & cin | a & cin;
+
+endmodule
+
+module countone(in ,out);
+
+input [6:0] in;
+output [2:0] out;
+wire [2:0] sum ,cout;
+
+fulladder FA1(in[6]    ,in[5]   ,in[4]   ,cout[0]  ,sum[0]);
+fulladder FA2(in[3]    ,in[2]   ,in[1]   ,cout[1]  ,sum[1]);
+fulladder FA3(cout[0]  ,cout[1] ,cout[2] ,out[2]   ,out[1]);
+fulladder FA4(sum[0]   ,sum[1]  ,in[0]   ,cout[2]  ,out[0]);
+
+endmodule
+
+module tb;
+
+reg [6:0] in;
+wire [2:0] out;
+
+countone dut(in ,out);
+
+initial
+begin
+in = 7'b1111000;
+#10;
+in = 7'b0101010;
+#10;
+in = 7'b0001111;
+#10;
+in = 7'b1000001;
+#10;
+in = 7'b0011001;
+#10;
+in = 7'b1111111;
+#10;
+in = 7'b0000000;
+#10;
+in = 7'b1110111;
+end
+
+endmodule
+
+
+
             
           
 
