@@ -4369,6 +4369,114 @@ end
 
 endmodule
 
+71) BUBBLE SORT
+
+module bubble(clk ,rst ,in1 ,in2 ,in3 ,in4 ,in5 ,out1 ,out2 ,out3 ,out4 ,out5 ,len);
+
+input clk ,rst;
+input [3:0] len;
+input [7:0] in1 ,in2 ,in3 ,in4 ,in5;
+output [7:0] out1 ,out2 ,out3 ,out4 ,out5;
+
+reg [7:0] mem [4:0];
+parameter idle = 4'b0000 ,check = 4'b0001 ,campare = 4'b0010 ,swap = 4'b0100 ,change = 4'b1000 ,stop = 4'b1111;
+reg [3:0] ps ,ns;
+reg [3:0] i ,j ,count;
+
+always @(posedge clk)
+begin
+if(rst)
+ps <= idle;
+else
+ps <= ns;
+end
+
+always @(ps ,len ,mem ,i ,j ,count)
+begin
+case(ps)
+idle    : ns = campare;
+check   : ns = (i + 1'b1 >= j) ? change : campare ;
+campare : ns = i < 4'b0100 ? (mem[i] > mem[i+1] ? swap : (count >= j - 1) ? stop : check) : ((count >= j - 1) ? stop : check); 
+swap    : ns = check;
+change  : ns = campare;
+stop    : ns = stop;
+endcase
+end
+
+always @(posedge clk)
+begin
+if(rst)
+begin
+j      <= len;
+i      <= 4'b0000;
+count  <= 4'b0000;
+mem[0] <= in1;
+mem[1] <= in2;
+mem[2] <= in3;
+mem[3] <= in4;
+mem[4] <= in5;
+end
+else if(ps == check)
+begin
+i <= i + 1'b1;
+end
+else if(ps == campare)
+begin
+count <= count + 1'b1;
+end
+else if(ps == change)
+begin
+i     <= 4'b0000;
+count <= 4'b0000;
+end
+else if(ps == swap)
+begin
+mem[i]     <= mem[i + 1];
+mem[i + 1] <= mem[i];
+count      <= count - 1'b1;
+end
+end
+
+assign out1 = (ps == stop) ? mem[0] : 8'b00000000;
+assign out2 = (ps == stop) ? mem[1] : 8'b00000000;
+assign out3 = (ps == stop) ? mem[2] : 8'b00000000;
+assign out4 = (ps == stop) ? mem[3] : 8'b00000000;
+assign out5 = (ps == stop) ? mem[4] : 8'b00000000;
+
+endmodule
+
+
+module tb;
+
+reg clk ,rst;
+reg [3:0] len;
+reg [7:0] in1 ,in2 ,in3 ,in4 ,in5;
+wire [7:0] out1 ,out2 ,out3 ,out4 ,out5;
+
+bubble dut(clk ,rst ,in1 ,in2 ,in3 ,in4 ,in5 ,out1 ,out2 ,out3 ,out4 ,out5 ,len);
+
+always #5 clk = ~clk;
+
+initial
+begin
+clk = 1'b0;
+rst = 1'b1;
+in1 = 22;
+in2 = 22;
+in3 = 22;
+in4 = 4;
+in5 = 22;
+len = 4'b0101;
+#6;
+rst = 1'b0;
+end
+
+endmodule
+
+
+
+
+
 
 
             
