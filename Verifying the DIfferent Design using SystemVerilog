@@ -1,131 +1,130 @@
-1) FULL_ADDER -> Design using Verilog and Verified using System Verilog
+1) D FLIP FLOP -> Design using Verilog and Verified using System Verilog
 
 RTL.v
 
-module adder(clk,rst,a,b,sum);
+module flipflop(clk ,rst ,in ,out);
   
-  input clk ,rst;
-  input [3:0] a ,b;
-  output reg [4:0] sum;
+  input clk ,rst ,in;
+  output reg out;
   
   always @(posedge clk)
     begin
       if(rst)
-        sum <= 5'b00000;
+        out <= 1'b0;
       else
-        sum <= a + b;
+        out <= in;
     end
-
+  
 endmodule
 
 TB.sv
 
 class transaction;
   
-  rand bit [3:0] a;
-  rand bit [3:0] b;
-  bit [4:0] sum;
+  rand bit in;
+  bit out;
   
-  function void display(string proccess);
-    $display("[%0s] A : %0d , B : %0d , SUM : %0d",proccess,a,b,sum);
+  function void display(string process = "");
+    $display("[%0s] IN = %0d OUT = %0d" ,process ,in ,out);
   endfunction
   
   function transaction copy();
-    copy = new();
-    copy.a = this.a;
-    copy.b = this.b;
-    copy.sum = this.sum;
+    copy     = new();
+    copy.in  = this.in;
+    copy.out = this.out;
   endfunction
-
+  
 endclass
 
 class generator;
   
-  transaction transgen;
-  mailbox #(transaction) gen2drv;
-  mailbox #(transaction) gen2sco;
-
-  int count;
-  event pass;
+  transaction gentrans;
+  mailbox #(transaction) gendrvmbx;
+  mailbox #(transaction) genscombx;
+  event sco;
   event done;
-
-  function new(mailbox #(transaction) gen2drv,mailbox #(transaction) gen2sco);
-    this.gen2drv = gen2drv;
-    this.gen2sco = gen2sco;
-    transgen = new();
+  
+  function new(mailbox #(transaction) gendrvmbx ,mailbox #(transaction) genscombx);
+    this.gendrvmbx = gendrvmbx;
+    this.genscombx = genscombx;
+    gentrans    = new();
   endfunction
   
-  task run();
-    repeat(count)
+  task genrun;
+    for(int i = 0 ;i < 10 ;i = i + 1)
       begin
-        transgen.randomize();
-        transgen.display("GEN");
-        gen2drv.put(transgen.copy);
-        gen2sco.put(transgen.copy);
-        @(pass);
+        gentrans.randomize();
+        $display("NEW STIMULI");
+        gentrans.display("GEN");
+        gendrvmbx.put(gentrans.copy);
+        genscombx.put(gentrans.copy);
+        @(sco);
+       //wait(sco.triggered);
       end
     -> done;
   endtask
-
+  
 endclass
 
-interface adder_interface;
-  logic clk ,rst;
-  logic [3:0] a ,b;
-  logic [4:0] sum;
+interface flip_flop;
+  
+  logic clk ,rst ,in ,out;
+  
 endinterface
 
 class driver;
   
-  transaction transdrv;
-  mailbox #(transaction) gen2drv;
-  virtual adder_interface aif;
+  transaction drvtrans;
+  mailbox #(transaction) drvgenmbx;
+  virtual flip_flop ff;
   
-  function new(mailbox #(transaction) gen2drv);
-    this.gen2drv = gen2drv;
+  function new(mailbox #(transaction) drvgenmbx);
+    this.drvgenmbx = drvgenmbx;
   endfunction
   
   task reset();
-    aif.rst <= 1'b1;
-    repeat(2) @(posedge aif.clk);
-    aif.rst <= 1'b0;
-    repeat(1) @(posedge aif.clk);
-    $display("-----RESET_OPERATION_DONE-----");
+    $display("RESET OPERATION STARTED");
+    //#15;
+    repeat(2) @(posedge ff.clk);
+    ff.rst <= 1'b1;
+    //#10;
+    @(posedge ff.clk);
+    ff.rst <= 1'b0;
+    $display("RESET OPERATION ENDED");
   endtask
   
-  task run();
+  task drvrun;
     forever
       begin
-        gen2drv.get(transdrv);
-        transdrv.display("DRV");
-        aif.a <= transdrv.a;
-        aif.b <= transdrv.b;
-        aif.sum <= transdrv.sum;
+        drvgenmbx.get(drvtrans);
+        $display("DRIVER OPERATION");
+        ff.in <= drvtrans.in;
+        drvtrans.display("DRV");
       end
   endtask
-
+     
 endclass
 
 class monitor;
   
-  transaction transmon;
-  mailbox #(transaction) mon2sco;
-  virtual adder_interface aif;
+  transaction monsco;
+  mailbox #(transaction) monscombx;
+  virtual flip_flop ff;
   
-  function new(mailbox #(transaction) mon2sco);
-    this.mon2sco = mon2sco;
+  function new(mailbox #(transaction) monscombx);
+    this.monscombx = monscombx;
+    //monsco         = new();
   endfunction
   
-  task run();
-    transmon = new();
+  task monrun();
+    monsco = new();
     forever
       begin
-        repeat(2) @(posedge aif.clk);
-        transmon.a   = aif.a;
-        transmon.b   = aif.b;
-        transmon.sum = aif.sum;
-        mon2sco.put(transmon);
-        transmon.display("MON");
+        //#10;
+        repeat(2) @(posedge ff.clk);
+        monsco.out = ff.out;
+        monscombx.put(monsco);
+        monsco.display("MON");
       end
   endtask
   
@@ -133,33 +132,33 @@ endclass
 
 class scoreboard;
   
-  transaction transgen;
-  transaction transsco;
-  mailbox #(transaction) gen2sco;
-  mailbox #(transaction) mon2sco;
+  transaction scogentrans;
+  transaction scomontrans;
+  mailbox #(transaction) genmbx;
+  mailbox #(transaction) monmbx;
+  event sco;
   
-  event pass;
-  
-  function new(mailbox #(transaction) gen2sco, mailbox #(transaction) mon2sco);
-    this.gen2sco = gen2sco;
-    this.mon2sco = mon2sco;
+  function new(mailbox #(transaction) genmbx ,mailbox #(transaction) monmbx);
+    this.genmbx = genmbx;
+    this.monmbx = monmbx;
   endfunction
   
-  task run();
-    
+  task scorun();
     forever
       begin
-        mon2sco.get(transsco);
-        gen2sco.get(transgen);
-        transgen.display("GENINMON");
-        transsco.display("MON");
-        if((transgen.a + transgen.b) == transsco.sum)
+        //$display("SCOREBOAD OPERATION");
+        //$display("SCO - %0t",$time);
+        genmbx.get(scogentrans);
+        monmbx.get(scomontrans);
+        $display("SCOREBOAD OPERATION");
+        scogentrans.display("GEN");
+        scomontrans.display("MON");
+        if(scomontrans.out == scogentrans.in)
           $display("CORRECT OUTPUT");
         else
-          $display("INCORRECT OUTPUT");
-        -> pass;
+          $display("WRONG OUTPUT");
+        -> sco;
       end
-    
   endtask
   
 endclass
@@ -170,44 +169,40 @@ class environment;
   driver drv;
   monitor mon;
   scoreboard sco;
-  event pass;
+  event scoevent;
   
-  mailbox #(transaction) gendrv;
-  mailbox #(transaction) gensco;
-  mailbox #(transaction) monsco;
+  mailbox #(transaction) gentodrvmbx;
+  mailbox #(transaction) gentoscombx;
+  mailbox #(transaction) montoscombx;
   
-  virtual adder_interface aif;
+  virtual flip_flop ff;
   
-  function new(virtual adder_interface aif);
-    
-    gendrv = new();
-    gensco = new();
-    monsco = new();
-    gen = new(gendrv ,gensco);
-    drv = new(gendrv);
-    mon = new(monsco);
-    sco = new(gensco ,monsco);
-    this.aif = aif;
-    drv.aif = this.aif;
-    mon.aif = this.aif;
-    gen.pass = pass;
-    sco.pass = pass;
-    
+  function new(virtual flip_flop ff);
+    gentodrvmbx = new();
+    gentoscombx = new();
+    montoscombx = new();
+    gen = new(gentodrvmbx ,gentoscombx);
+    drv = new(gentodrvmbx);
+    mon = new(montoscombx);
+    sco = new(gentoscombx ,montoscombx);
+    gen.sco = scoevent;
+    sco.sco = scoevent;
+    this.ff = ff;
+    drv.ff = this.ff;
+    mon.ff = this.ff;
   endfunction
   
   task pre_test();
     drv.reset();
   endtask
   
-  task test();
-    
+  task main_test();
     fork
-      gen.run();
-      drv.run();
-      sco.run();
-      mon.run();
+      gen.genrun();
+      drv.drvrun();
+      mon.monrun();
+      sco.scorun();
     join_any
-    
   endtask
   
   task post_test();
@@ -216,92 +211,52 @@ class environment;
   endtask
   
   task run();
-    pre_test;
-    test;
-    post_test;
+    pre_test();
+    main_test();
+    post_test();
   endtask
   
 endclass
 
-
 module tb;
   
+  flip_flop ff();
   environment env;
-  adder_interface aif();
-  adder dut(aif.clk ,aif.rst ,aif.a ,aif.b ,aif.sum);
+  flipflop dut(ff.clk ,ff.rst ,ff.in ,ff.out);
   
   initial
     begin
-      aif.clk <= 1'b0;
+      ff.clk <= 1'b0;
     end
   
-  always #5 aif.clk <= ~aif.clk;
+  always #5 ff.clk <= ~ff.clk;
   
   initial
     begin
-      env = new(aif);
-      env.gen.count = 10;
+      env = new(ff);
       env.run();
     end
   
-  initial
-    begin
-      $dumpfile("dump.vcd");
-      $dumpvars;
-      #1000 
-      $finish();
-    end
-  
-endmodule
-
-2) Verify the 4 bit up counter using assertion 
-
-rtl.v
-
-module counter(clk ,rst ,out);
-  
-  input clk ,rst;
-  output reg [3:0] out;
-  
-  always @(posedge clk)
-    begin
-      if(rst)
-        out <= 4'b0000;
-      else
-        out <= out + 1'b1;
-    end
+  initial begin
+  $dumpfile("dump.vcd");
+  $dumpvars;
+  #10000 
+  $finish;
+end
   
 endmodule
   
-TB.sv
-
-module tb;
   
-  reg clk ,rst;
-  wire [3:0] out;
   
-  counter DUT(clk ,rst ,out);
   
-  initial
-    begin
-      clk = 1'b0;
-      rst = 1'b1;
-      #6
-      rst = 1'b0;
-    end
   
-  always #5 clk = ~clk;
   
-  Countercheck : assert property(@(posedge clk) !rst |=> ($past(out) + 1 == out)) $info("CORRECT OUTPUT AT THIS CLOCK EDGE",$time); else $error("WRONG OUTPUT AT THIS CLOCK EDGE",$time);
   
-  initial 
-    begin
-      $assertvacuousoff(0);
-      $dumpfile("dump.vcd");
-      $dumpvars;
-      #200; 
-      $finish;
-    end
+    
+    
   
-endmodule
   
+    
+  
+  
+    
