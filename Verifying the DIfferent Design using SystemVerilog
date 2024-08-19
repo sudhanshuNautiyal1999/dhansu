@@ -245,6 +245,258 @@ module tb;
 end
   
 endmodule
+
+2) FULL ADDER
+
+RTL.v
+
+module adder(clk ,rst ,a ,b ,sum);
+  
+  input clk ,rst;
+  input [3:0] a ,b;
+  output reg [4:0] sum;
+  
+  always @(posedge clk)
+    begin
+      if(rst)
+        sum <= 5'b00000;
+      else
+        sum <= a + b;
+    end
+  
+endmodule
+
+TB.sv
+
+class transaction;
+  
+  randc bit [3:0] a ,b;
+  bit [4:0] sum;
+  
+  function void display(string s = "");
+    $display("[%0s] : A = %0d B = %0d SUM = %0d", s ,a ,b ,sum ,$time);
+  endfunction
+  
+  function transaction copy();
+    copy     = new();
+    copy.a   = this.a;
+    copy.b   = this.b;
+    copy.sum = this.sum;
+  endfunction
+  
+endclass
+
+class generator;
+  
+  transaction gentrans;
+  mailbox #(transaction) gentodrvmbx;
+  mailbox #(transaction) gentoscombx;
+  event sco;
+  event over;
+  
+  function new(mailbox #(transaction) gentodrvmbx ,mailbox #(transaction) gentoscombx);
+    this.gentodrvmbx = gentodrvmbx;
+    this.gentoscombx = gentoscombx;
+    gentrans         = new();
+  endfunction
+  
+  task run();
+    for(int i = 0 ;i < 10 ;i = i + 1)
+      begin
+        $display("STIMULI GENERATION");
+        gentrans.randomize();
+        gentodrvmbx.put(gentrans.copy);
+        gentoscombx.put(gentrans.copy);
+        gentrans.display("GEN");
+        @(sco);
+      end
+    ->over;
+  endtask
+  
+endclass
+
+interface adder_if();
+  logic clk ,rst;
+  logic [3:0] a ,b;
+  logic [4:0] sum;
+endinterface
+
+class driver;
+  
+  transaction drvtrans;
+  mailbox #(transaction) gentodrvmbx;
+  virtual adder_if af;
+  
+  function new(mailbox #(transaction) gentodrvmbx);
+    this.gentodrvmbx = gentodrvmbx;
+  endfunction
+  
+  task reset();
+    $display("RESET OPERATION STARTED");
+    af.rst <= 1'b1;
+    repeat(2) @(posedge af.clk);
+    af.rst <= 1'b0;
+    $display("RESET OPERATION COMPLETED");
+  endtask
+  
+  task run();
+    forever
+      begin
+        repeat(1) @(posedge af.clk);
+        gentodrvmbx.get(drvtrans);
+        drvtrans.display("DRV");
+        af.a <= drvtrans.a;
+        af.b <= drvtrans.b;
+      end
+  endtask
+  
+endclass
+
+class monitor;
+  
+  transaction montrans;
+  mailbox #(transaction) montoscombx;
+  virtual adder_if af;
+  
+  function new(mailbox #(transaction) montoscombx);
+    this.montoscombx = montoscombx;
+  endfunction
+  
+  task run;
+    montrans = new();
+    forever
+      begin
+        repeat(3) @(posedge af.clk);
+        montrans.sum = af.sum;
+        montrans.display("MON");
+        montoscombx.put(montrans);
+      end
+  endtask
+  
+endclass
+
+class scoreboard;
+  
+  transaction montrans;
+  transaction gentrans;
+  mailbox #(transaction) montoscombx;
+  mailbox #(transaction) gentoscombx;
+  event sco;
+  
+  function new(mailbox #(transaction) montoscombx ,mailbox #(transaction) gentoscombx);
+    this.montoscombx = montoscombx;
+    this.gentoscombx = gentoscombx;
+  endfunction
+  
+  task run();
+    forever
+      begin
+        montoscombx.get(montrans);
+        gentoscombx.get(gentrans);
+        $display("SCOREBOARD RESULT");
+        gentrans.display("GEN");
+        montrans.display("SCO");
+        if(gentrans.a + gentrans.b == montrans.sum)
+          $display("PASS");
+        else
+          $display("FAIL");
+        ->sco;
+      end
+  endtask
+  
+endclass
+
+class environment;
+  
+  generator  gen;
+  driver     drv;
+  monitor    mon;
+  scoreboard sco;
+  mailbox #(transaction) gendrvmbx;
+  mailbox #(transaction) genscombx;
+  mailbox #(transaction) monscombx;
+  virtual adder_if af;
+  event scor;
+  
+  function new(virtual adder_if af);
+    gendrvmbx = new();
+    genscombx = new();
+    monscombx = new();
+    gen       = new(gendrvmbx ,genscombx);
+    drv       = new(gendrvmbx);
+    mon       = new(monscombx);
+    sco       = new(monscombx ,genscombx);
+    this.af   = af;
+    drv.af    = this.af;
+    mon.af    = this.af;
+    gen.sco   = scor;
+    sco.sco   = scor;
+  endfunction
+  
+  task pre_test();
+    drv.reset();
+  endtask
+  
+  task main_test();
+    fork
+      gen.run();
+      drv.run();
+      mon.run();
+      sco.run();
+    join_any
+  endtask
+  
+  task post_test();
+    wait(gen.over.triggered);
+    $finish();
+  endtask
+  
+  task run();
+    pre_test();
+    main_test();
+    post_test();
+  endtask
+  
+endclass
+
+module tb;
+  
+  adder_if af();
+  adder dut(af.clk ,af.rst ,af.a ,af.b ,af.sum);
+  
+  initial
+    begin
+      af.clk <= 1'b0;
+    end
+  
+  always #5 af.clk <= ~af.clk;
+  
+  environment env;
+  
+  initial
+    begin
+      env = new(af);
+      env.run();
+    end
+  
+  initial begin
+  $dumpfile("dump.vcd");
+  $dumpvars;
+  #10000 
+  $finish;
+end
+  
+endmodule
+  
+  
+
+  
+  
+
+    
+  
+  
+
   
   
   
