@@ -274,7 +274,7 @@ class transaction;
   bit [4:0] sum;
   
   function void display(string s = "");
-    $display("[%0s] : A = %0d B = %0d SUM = %0d", s ,a ,b ,sum ,$time);
+    $display("[%0s] : A = %0d B = %0d SUM = %0d", s ,a ,b ,sum);
   endfunction
   
   function transaction copy();
