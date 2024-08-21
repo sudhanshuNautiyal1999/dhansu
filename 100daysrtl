@@ -4473,8 +4473,9 @@ end
 
 endmodule
 
-72) The FSM accepts an input binary sequence such as 001010011101.... Its output is zero except when the number of 1's that have been input is a multiple of three.
-In the example below, the output that is observed after each input bit is received is shown directly below the input bit received.
+72) The FSM accepts an input binary sequence such as 001010011101.... Its output is zero except when the number of 1's that have been 
+input is a multiple of three. In the example below, the output that is observed after each input bit is received is shown directly
+below the input bit received.
 input  : 0 1 0 0 1 1 0 0 1 0 1 0 0 1 0 1 0 1 1 0 1 1 0 1 1 0 1 1... 
 output : 1 0 0 0 0 1 1 1 0 0 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 1..>
 Note: Before any bits have been received, the output is 1. This is because zero 1's is also a multiple of three.
