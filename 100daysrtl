@@ -4473,6 +4473,115 @@ end
 
 endmodule
 
+72) The FSM accepts an input binary sequence such as 001010011101.... Its output is zero except when the number of 1's that have been input is a multiple of three.
+In the example below, the output that is observed after each input bit is received is shown directly below the input bit received.
+input  : 0 1 0 0 1 1 0 0 1 0 1 0 0 1 0 1 0 1 1 0 1 1 0 1 1 0 1 1... 
+output : 1 0 0 0 0 1 1 1 0 0 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 1..>
+Note: Before any bits have been received, the output is 1. This is because zero 1's is also a multiple of three.
+
+module multiplethree(clk ,rst ,in ,out);
+
+input clk ,rst ,in;
+output out;
+
+parameter S0 = 2'b00 ,S1 = 2'b01 ,S2 = 2'b10 ,S3 = 2'b11;
+reg [1:0] ps ,ns;
+
+always @(posedge clk)
+begin
+if(rst)
+ps <= S0;
+else
+ps <= ns;
+end
+
+always @(ps ,in)
+case(ps)
+S0 : ns = in ? S1 : S0;
+S1 : ns = in ? S2 : S1;
+S2 : ns = in ? S3 : S2;
+S3 : ns = in ? S1 : S0;
+endcase
+
+assign out = (ps == S0) ? (in ? 1'b0 : 1'b1) : (ps == S3 ? (in ? 1'b0 : 1'b1) : (ps == S2 ? (in ? 1'b1 : 1'b0) : 1'b0));
+
+endmodule
+
+module tb;
+
+reg clk ,rst ,in;
+wire out;
+
+multiplethree dut(clk ,rst ,in ,out);
+
+always #5 clk = ~clk;
+
+initial
+begin
+clk = 1'b0;
+rst = 1'b1;
+in  = 1'b0;
+#6;
+rst = 1'b0;
+#9;
+in  = 1'b1;
+#10;
+in  = 1'b0;
+#10;
+in  = 1'b0;
+#10;
+in  = 1'b1;
+#10;
+in  = 1'b1;
+#10;
+in  = 1'b0;
+#10;
+in  = 1'b0;
+#10;
+in  = 1'b1;
+#10;
+in  = 1'b0;
+#10;
+in  = 1'b1;
+#10;
+in  = 1'b0;
+#10;
+in  = 1'b0;
+#10;
+in  = 1'b1;
+#10;
+in  = 1'b0;
+#10;
+in  = 1'b1;
+#10;
+in  = 1'b0;
+#10;
+in  = 1'b1;
+#10;
+in  = 1'b1;
+#10;
+in  = 1'b0;
+#10;
+in  = 1'b1;
+#10;
+in  = 1'b1;
+#10;
+in  = 1'b0;
+#10;
+in  = 1'b1;
+#10;
+in  = 1'b1;
+#10;
+in  = 1'b0;
+#10;
+in  = 1'b1;
+
+end
+
+endmodule
+
+
+
 
 
 
