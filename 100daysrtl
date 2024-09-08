@@ -4581,6 +4581,62 @@ end
 
 endmodule
 
+73) Generate the following pattern using verilog ,at every clock cycle one number is generated like for 1st clk cycle 0 ,2nd clk cycle 1
+,3rd clk cycle 0 ,4th clk cycle 2 and so on..
+
+    Pattern -> 0 1 0 2 0 3 0 4 0 5 0 6 0 7 0 8 0 9 0 10 0 11 0 12 ..............
+
+module uniquepattern(clk ,rst ,out);
+
+input clk ,rst;
+output reg [15:0] out;
+reg [15:0] result;
+reg notgate;
+
+always @(posedge clk)
+begin
+if(rst)
+begin
+out     <= 16'b000000000000000000;
+result  <= 16'b000000000000000000;
+notgate <= 1'b0;
+end
+else if(~notgate)
+begin
+out     <= result + 1'b1;
+result  <= result + 1'b1;
+notgate <= ~notgate;
+end
+else
+begin
+out     <= 16'b000000000000000000;
+notgate <= ~notgate;
+result  <= result;
+end
+end
+
+endmodule
+
+module tb;
+
+reg clk ,rst;
+wire [15:0] out;
+
+uniquepattern dut(clk ,rst ,out);
+
+always #5 clk = ~clk;
+
+initial
+begin
+clk = 1'b0;
+rst = 1'b1;
+#6;
+rst = 1'b0;
+end
+
+endmodule
+
+
 
 
 
