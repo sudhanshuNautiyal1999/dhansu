@@ -4636,6 +4636,114 @@ end
 
 endmodule
 
+74) Design a logic that outputs unique second largest number seen in input stream.
+// input
+valid: 1   0  1  1  1  1   1   1
+data:  10  5  4  7  9  11  11  12
+// output
+O/P:    -  -  -  4  7  9   10  10  11
+valid:  0  0  0  1  1  1    1   1  1 
+
+Note:- output should come in next clk edge.
+Input interface take valid and data, similarly output interface outputs data along with valid.
+
+module newpractice(clk,rst, valid_in ,valid_out, data_in, data_out);
+  
+input clk,rst, valid_in;
+input [3:0] data_in;
+output valid_out;
+output [3:0] data_out;
+reg [3:0] delay;
+reg [3:0] largest;
+reg [3:0] data_out;
+reg valid_out;
+
+
+always @(posedge clk)
+begin
+if (rst)
+begin
+data_out  <= 4'b0000;
+delay     <= 4'b0000;
+valid_out <= 1'b0;
+largest   <= 4'b0000;
+end
+else
+begin
+if(valid_in == 1'b1)
+begin
+if (data_in > largest)
+begin
+largest   <= data_in;
+delay     <= largest;
+valid_out <= 1'b0;
+data_out  <= delay;
+end
+else
+begin
+if(data_in > delay )
+begin
+data_out  <= delay;
+delay     <= data_in;
+valid_out <= 1;
+end
+else
+begin
+if(delay < data_in)
+begin
+data_out  <= delay;
+valid_out <= 1'b1;
+end
+end
+end
+end
+end
+end
+endmodule
+
+module tb;
+
+reg clk,rst, valid_in;
+reg [3:0] data_in;
+wire valid_out;
+wire [3:0] data_out;
+
+newpractice dut(clk,rst, valid_in ,valid_out, data_in, data_out);
+
+always #5 clk = ~clk;
+  
+initial
+begin
+clk = 1'b0;
+rst = 1'b1;
+valid_in = 1'b1;
+#6;
+rst = 1'b0;
+#9;
+data_in = 13;
+#10;
+valid_in = 1'b1;
+data_in = 3;
+#10;
+data_in = 3;
+#10;
+data_in = 5;
+#20;
+data_in = 2;
+#10;
+data_in = 14;
+#20;
+
+data_in = 1;
+#10;
+data_in = 8;
+
+end
+endmodule 
+
+
+
+
 
 
 
