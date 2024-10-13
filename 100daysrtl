@@ -4737,6 +4737,64 @@ data_in = 8;
 end
 endmodule 
 
+75 There is a room with 2 gates "entry" and "exit". If a person enters the room ENTRY is HIGH, and if person exits "EXIT" is high 
+at any given time, how many person are in a room, Write a verilog code for number of person in the room. Number of person in the room 
+at any time will not be more than 63. Only one person can enter and exit at any given time, but as different gates are present for entry
+and exit, two different persons can enter and exit simultaneously. By only one person entering and exiting at any given time it means, 
+enter signal goes to "1" when someone is entering, goes to "0" and then only another person can enter, similarly for exiting.
+Counter should get reset when rst = 0
+Note : Assuming Person enter or exit at specific time let say posedge of clk.
+
+module personcount(clk ,rst ,enter ,exit ,count);
+
+input clk ,rst ,enter ,exit;
+output reg [5:0]count;
+
+always @(posedge clk)
+begin
+if(rst)
+count <= 6'b000000;
+else if(enter == 1'b1 && exit == 1'b1)
+count <= count;
+else if(enter == 1'b1)
+count <= count + 1'b1;
+else if(exit == 1'b1)
+count <= count - 1'b1;
+else
+count <= count;
+end
+
+endmodule
+
+module tb;
+
+reg clk ,rst ,enter ,exit;
+wire [5:0]count;
+
+personcount dut(clk ,rst ,enter ,exit ,count);
+
+always #5 clk = ~clk;
+
+initial
+begin
+clk = 1'b0;
+rst = 1'b1;
+#6;
+rst = 1'b0;
+enter = 1'b1;
+#9;
+enter = 1'b1;
+#60;
+enter = 1'b0;
+exit  = 1'b1;
+#60;
+enter = 1'b1;
+exit  = 1'b1;
+end
+
+endmodule
+
+
 
 
 
