@@ -4737,7 +4737,7 @@ data_in = 8;
 end
 endmodule 
 
-75 There is a room with 2 gates "entry" and "exit". If a person enters the room ENTRY is HIGH, and if person exits "EXIT" is high 
+75) There is a room with 2 gates "entry" and "exit". If a person enters the room ENTRY is HIGH, and if person exits "EXIT" is high 
 at any given time, how many person are in a room, Write a verilog code for number of person in the room. Number of person in the room 
 at any time will not be more than 63. Only one person can enter and exit at any given time, but as different gates are present for entry
 and exit, two different persons can enter and exit simultaneously. By only one person entering and exiting at any given time it means, 
@@ -4793,6 +4793,100 @@ exit  = 1'b1;
 end
 
 endmodule
+
+76) Every cycle, number is left shifted by 1, and new bit is injected in LSB. Calculate whether number is divisible by 5 and
+show the the number at every cycle at output.
+
+module leftdivisible(clk ,rst ,in ,out ,number);
+  
+  input clk ,rst ,in;
+  output out;
+  output reg [7:0] number;
+  
+  parameter I = 4'b0000 ,A = 4'b0001 ,B = 4'b0010 ,C = 4'b0100 ,D = 4'b1000 ,E = 4'b1111 ,F = 4'b1010;
+  reg [3:0] ps ,ns;
+  
+  always @(posedge clk)
+    begin
+      if(rst)
+        ps <= I;
+      else
+        ps <= ns;
+    end
+  
+  always @(ps ,in)
+    begin
+      case(ps)
+        I : ns = A;
+        A : ns = in ? B : A;
+        B : ns = in ? D : C;
+        C : ns = in ? F : E;
+        D : ns = in ? C : B;
+        E : ns = in ? E : D;
+        F : ns = in ? B : F;
+        default : ns = I;
+      endcase
+    end
+  
+  always @(posedge clk)
+    begin
+      if(rst)
+        number <= 8'b0000_0000;
+      else
+        begin
+          number    <= number << 1;
+          number[0] <= in;
+        end
+    end
+  
+  assign out = (ps == F) ? 1'b1 : 1'b0;
+  
+endmodule
+
+module tb;
+  
+  reg clk ,rst ,in;
+  wire out;
+  wire [7:0] number;
+  
+  leftdivisible dut(clk ,rst ,in ,out ,number);
+  
+  always #5 clk = ~clk;
+  
+  initial
+    begin
+      clk = 1'b0;
+      rst = 1'b1;
+      #6;
+      rst = 1'b0;
+      #9;
+      in = 1'b1;
+      #10;
+      in = 1'b1;
+      #10;
+      in = 1'b0;
+      #10;
+      in = 1'b0;
+      #10;
+      in = 1'b0;
+      #10;
+      in = 1'b0;
+      #10;
+      in = 1'b1;
+      #10;
+      in = 1'b0;
+      #20;
+      $finish();
+    end
+  
+  initial
+    begin
+      $dumpfile("dump.vcd");
+      $dumpvars();
+    end
+  
+endmodule
+
 
 
 
