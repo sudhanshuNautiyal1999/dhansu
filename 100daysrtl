@@ -4887,6 +4887,86 @@ module tb;
   
 endmodule
 
+77) Design the below counter using FSM.
+
+    0 1 2 3 4 5 6 7 6 5 4 4 3 2 1 0 1 2 3 4 5 6 7 6 5 4 4 3 2 1 .....
+
+module newpractice(clk ,rst ,out);
+  
+  input clk ,rst;
+  output [2:0] out;
+  
+  parameter Up_count = 2'b00 ,Down_count = 2'b01 ,stop = 2'b10;
+  reg [1:0] ps ,ns;
+  reg [2:0] count;
+  reg check;
+  
+  always @(posedge clk)
+    begin
+      if (rst)
+        ps <= Up_count;
+      else
+        ps <= ns;
+    end
+  
+  always @(ps ,count ,check)
+    begin
+      case(ps)
+        Up_count   : ns = (count == 3'b110) ? Down_count : Up_count;
+        Down_count : ns = (count == 3'b001) ? Up_count : ((count == 3'b101 & !check) ? stop : Down_count);
+        stop       : ns = Down_count;
+      endcase
+    end
+  
+  always @(posedge clk)
+    begin
+      if(rst)
+        begin
+          count <= 3'b000;
+          check <= 1'b0;
+        end
+      else if(ps == Up_count)
+        begin
+          count <= count + 1'b1;
+          check <= 1'b0;
+        end
+      else if(ps == Down_count)
+        begin
+          count <= count - 1'b1;
+        end
+      else if(ps == stop)
+        begin
+          check <= 1'b1;
+        end
+      else
+        count <= count;
+    end
+  
+  assign out = (ps == Up_count | ps == Down_count | ps == stop) ? count : 3'b000;
+  
+endmodule
+
+module tb;
+  
+  reg clk ,rst;
+  wire [2:0] out;
+  
+  newpractice dut(clk ,rst ,out);
+  
+  always #5 clk = ~clk;
+  
+  initial
+    begin
+      clk = 1'b0;
+      rst = 1'b1;
+      #6
+      rst = 1'b0;
+    end
+endmodule
+  
+  
+  
+
 
 
 
