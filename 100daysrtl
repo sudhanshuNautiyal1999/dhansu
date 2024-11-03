@@ -5005,7 +5005,6 @@ module unique_101_pattern(clk ,rst ,in ,out);
   
   assign out = (ps == G || ps == I) ? 1'b1 :(ps == H ? 1'b0 : 1'b0);
          
-  
 endmodule
 
 module tb;
