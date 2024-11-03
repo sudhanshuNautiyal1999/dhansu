@@ -4963,6 +4963,100 @@ module tb;
       rst = 1'b0;
     end
 endmodule
+
+78) Generates an output as follows for the given input
+Input (I): 0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,…
+Output(O): 0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,…
+Note:
+An input ,I, asserts for only one clock cycle.After the input asserts, then the output should assert at 6 cycles and then deassert for 
+another cycle and then assert again for one cycle.It is a 101 pattern after 6 cycles .If another pulse on input appears during these 
+8 cycles output 101 pattern should not be generated for this new input.
+
+module unique_101_pattern(clk ,rst ,in ,out);
+  
+  input clk ,rst ,in;
+  output out;
+  
+  parameter A = 5'b00000 ,B = 5'b00001 ,C = 5'b00010 ,D = 5'b00100 ,E = 5'b01000 ,F = 5'b10000 ,G = 5'b10001 ,H = 5'b01010 ,I = 5'b11111;
+  reg [6:0] ps ,ns;
+  
+  always @(posedge clk)
+    begin
+      if(rst)
+        ps <= A;
+      else
+        ps <= ns;
+    end
+  
+  always @(ps ,in)
+    begin
+      case(ps)
+        A : ns = in ? B : A;
+        B : ns = C;
+        C : ns = D;
+        D : ns = E;
+        E : ns = F;
+        F : ns = G;
+        G : ns = H;
+        H : ns = I;
+        I : ns = A;
+      endcase    
+    end
+  
+  assign out = (ps == G || ps == I) ? 1'b1 :(ps == H ? 1'b0 : 1'b0);
+         
+  
+endmodule
+
+module tb;
+  
+  reg clk ,rst ,in;
+  wire out;
+  
+  unique_101_pattern dut(clk ,rst ,in ,out);
+  
+  always #5 clk = ~clk;
+  
+  initial
+    begin
+      clk = 1'b0;
+      rst = 1'b0;
+      in  = 1'b0;
+      #5;
+      rst = 1'b1;
+      #5;
+      rst = 1'b0;
+      #5;
+      in = 1'b0;
+      #10;
+      in = 1'b0;
+      #10;
+      in = 1'b0;
+      #10;
+      in = 1'b1;
+      #10;
+      in = 1'b0;
+      #10;
+      in = 1'b1;
+      #10;
+      in = 1'b0;
+      #10;
+      in = 1'b1;
+      #10;
+      in = 1'b0;
+      #10;
+      in = 1'b1;
+      #10;
+      in = 1'b0;
+      #10;
+      in = 1'b1;
+      #10;
+      in = 1'b0;
+    end
+
+endmodule
+
+
   
   
   
